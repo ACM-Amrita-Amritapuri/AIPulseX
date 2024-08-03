@@ -2,7 +2,7 @@ Here’s the revised README file for your GitHub repository with the requested c
 
 ---
 
-# AIPulseX: A 30-Day Machine Learning and Deep Learning Challenge 🚀
+# AIPulseX: An N-Day Machine Learning and Deep Learning Challenge 🚀
 
 Welcome to the AIPulseX repository! We are a team from the ACM Student Chapter, SIG AI, based at the Amrita School of Computing, Amritapuri. Our mission is to explore and implement various machine learning and deep learning projects over the next **N days**. Each day, we will work on a new project, documenting our progress and results clearly in individual project folders.
 
@@ -26,14 +26,14 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 
 | S.No | Project Name                               | Date       |
 | ---- | ------------------------------------------ | ---------- |
-| 1    | Music Genre Classification                 | YYYY-MM-DD |
+| 1    | Clustering Based Augmented Data Generation | YYYY-MM-DD |
 | 2    | Handwritten Digits Classification          | YYYY-MM-DD |
 | 3    | Review Classifier                          | YYYY-MM-DD |
 | 4    | Sound Emotion Detector                     | YYYY-MM-DD |
 | 5    | Movie Recommendation                       | YYYY-MM-DD |
 | 6    | Clustering Based Regression                | YYYY-MM-DD |
 | 7    | Data Driven Ranking System                 | YYYY-MM-DD |
-| 8    | Clustering Based Augmented Data Generation | YYYY-MM-DD |
+| 8    | Music Genre Classification                 | YYYY-MM-DD |
 | 9    | Spam Email Detection                       | YYYY-MM-DD |
 | 10   | Customer Churn Prediction                  | YYYY-MM-DD |
 | 11   | Blind People Object Detection              | YYYY-MM-DD |
