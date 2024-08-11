@@ -24,23 +24,23 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 
 ## Project Timeline 📅
 
-| S.No | Project Name                         | Date       | Team |
-| ---- | ------------------------------------ | ---------- | ---- |
-| 1    | Clustering Based Data Augmentation   | YYYY-MM-DD |      |
-| 2    | Handwritten Digits Classification    | YYYY-MM-DD |      |
-| 3    | Review Classifier                    | YYYY-MM-DD |      |
-| 4    | Sound Emotion Detector               | YYYY-MM-DD |      |
-| 5    | Movie Recommendation                 | YYYY-MM-DD |      |
-| 6    | Clustering Based Regression          | YYYY-MM-DD |      |
-| 7    | Data Driven Ranking System           | YYYY-MM-DD |      |
-| 8    | Music Genre Classification           | YYYY-MM-DD |      |
-| 9    | Spam Email Detection                 | YYYY-MM-DD |      |
-| 10   | Customer Churn Prediction            | YYYY-MM-DD |      |
-| 11   | Blind People Object Detection        | YYYY-MM-DD |      |
-| 12   | Caption Generation                   | YYYY-MM-DD |      |
-| 13   | Image Colorization                   | YYYY-MM-DD |      |
-| 14   | Face Recognition Using Eigen Vectors | YYYY-MM-DD |      |
-| 15   | Gesture Control                      | YYYY-MM-DD |      |
+| S.No | Project Name                       | Date       | Team                                      |
+| ---- | ---------------------------------- | ---------- | ----------------------------------------- |
+| 1    | Clustering Based Data Augmentation | YYYY-MM-DD | Lokesh Yarramallu, K Kaushik, Madan Gopal |
+| 2    | Handwritten Digits Classification  | YYYY-MM-DD | Karthik R S, Y Madhav                     |
+| 3    | Review Classifier                  | YYYY-MM-DD | Vani Sugovind S.R, Siddharth              |
+| 4    | Sound Emotion Detector             | YYYY-MM-DD | Abhinav M Nair (Solo)                     |
+| 5    | Movie Recommendation               | YYYY-MM-DD | K. Madhuri, Y. Madhav                     |
+| 6    | Music Genre Classification         | YYYY-MM-DD | Meghana, Snigdha                          |
+| 7    |                                    | YYYY-MM-DD |                                           |
+| 8    |                                    | YYYY-MM-DD |                                           |
+| 9    |                                    | YYYY-MM-DD |                                           |
+| 10   |                                    | YYYY-MM-DD |                                           |
+| 11   |                                    | YYYY-MM-DD |                                           |
+| 12   |                                    | YYYY-MM-DD |                                           |
+| 13   |                                    | YYYY-MM-DD |                                           |
+| 14   |                                    | YYYY-MM-DD |                                           |
+| 15   |                                    | YYYY-MM-DD |                                           |
 
 _Dates will be updated as we progress through the challenge._
 
