@@ -32,8 +32,8 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 4    | Sound Emotion Detector             | YYYY-MM-DD | Abhinav M Nair                            |
 | 5    | Movie Recommendation               | YYYY-MM-DD | K. Madhuri, Y. Madhav                     |
 | 6    | Music Genre Classification         | YYYY-MM-DD | Meghana, Snigdha                          |
-| 7    | Clustering Based Ranking System    | YYYY-MM-DD | Lokesh, MadanGopal                        |
-| 8    |                                    | YYYY-MM-DD |                                           |
+| 7    | Clustering Based Ranking System    | YYYY-MM-DD | Lokesh, Madan Gopal                       |
+| 8    | Clustering Based Regression        | YYYY-MM-DD | Lokesh, Madan Gopal                       |
 | 9    |                                    | YYYY-MM-DD |                                           |
 | 10   |                                    | YYYY-MM-DD |                                           |
 | 11   |                                    | YYYY-MM-DD |                                           |
