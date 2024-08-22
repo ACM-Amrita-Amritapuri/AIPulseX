@@ -24,4 +24,5 @@ This project provides a simple yet effective approach to face recognition using 
 
 ### **Team 👥**
 
-- **Lokesh Madan**
+- **Lokesh Yarramallu**
+- **Madan Gopal**
