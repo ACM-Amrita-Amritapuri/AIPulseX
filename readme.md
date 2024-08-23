@@ -35,9 +35,9 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 7    | Clustering Based Ranking System    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 8    | Clustering Based Regression        | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 9    | FaceRecognition-PCA/EigenVector    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 10   |                                    | YYYY-MM-DD |                                           |
-| 11   |                                    | YYYY-MM-DD |                                           |
-| 12   |                                    | YYYY-MM-DD |                                           |
+| 10   | LipNet                             | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 11   | SentenceSimilarityCalculator       | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 12   | SimpleGAN                          | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 13   |                                    | YYYY-MM-DD |                                           |
 | 14   |                                    | YYYY-MM-DD |                                           |
 | 15   |                                    | YYYY-MM-DD |                                           |
