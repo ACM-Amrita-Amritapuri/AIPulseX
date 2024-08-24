@@ -29,15 +29,15 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 1    | Clustering Based Data Augmentation | YYYY-MM-DD | Lokesh Yarramallu, K Kaushik, Madan Gopal |
 | 2    | Handwritten Digits Classification  | YYYY-MM-DD | Karthik R S, Y Madhav                     |
 | 3    | Review Classifier                  | YYYY-MM-DD | Vani Sugovind S.R, Siddharth              |
-| 4    | Sound Emotion Detector             | YYYY-MM-DD | Abhinav M Nair (Solo)                     |
+| 4    | Sound Emotion Detector             | YYYY-MM-DD | Abhinav M Nair                            |
 | 5    | Movie Recommendation               | YYYY-MM-DD | K. Madhuri, Y. Madhav                     |
 | 6    | Music Genre Classification         | YYYY-MM-DD | Meghana, Snigdha                          |
-| 7    |                                    | YYYY-MM-DD |                                           |
-| 8    |                                    | YYYY-MM-DD |                                           |
-| 9    |                                    | YYYY-MM-DD |                                           |
-| 10   |                                    | YYYY-MM-DD |                                           |
-| 11   |                                    | YYYY-MM-DD |                                           |
-| 12   |                                    | YYYY-MM-DD |                                           |
+| 7    | Clustering Based Ranking System    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 8    | Clustering Based Regression        | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 9    | FaceRecognition-PCA/EigenVector    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 10   | LipNet                             | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 11   | SentenceSimilarityCalculator       | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 12   | SimpleGAN                          | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 13   |                                    | YYYY-MM-DD |                                           |
 | 14   |                                    | YYYY-MM-DD |                                           |
 | 15   |                                    | YYYY-MM-DD |                                           |
