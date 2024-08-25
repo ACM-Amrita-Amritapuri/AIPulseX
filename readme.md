@@ -38,9 +38,9 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 10   | LipNet                             | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 11   | SentenceSimilarityCalculator       | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 12   | SimpleGAN                          | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 13   |                                    | YYYY-MM-DD |                                           |
-| 14   |                                    | YYYY-MM-DD |                                           |
-| 15   |                                    | YYYY-MM-DD |                                           |
+| 13   | FaceSwapping with CV techniques    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 14   | AI Helper (GENAI based Extension)  | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 15   | GENAI based image colorization     | YYYY-MM-DD | SanjitTeja                                |
 
 _Dates will be updated as we progress through the challenge._
 
