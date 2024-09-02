@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "GestureFlow",
+    "version": "1.0",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "webRequest"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type" : "module"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "options_page" : "options.html",
+    "action" : {
+        "default_popup" : "popup.html"
+    }
+}
