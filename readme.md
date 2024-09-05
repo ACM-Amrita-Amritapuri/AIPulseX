@@ -50,6 +50,7 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 25   | Voice Bot                          | YYYY-MM-DD | Y. Nitish Reddy                           |
 | 26   | Pdf ChatBot                        | YYYY-MM-DD | Kaushik                                   |
 | 27   | Image Classification using VGG16   | YYYY-MM-DD |Lokesh Yarramallu, Madan Gopal             |
+| 28   | Face Recognition Attendance System | YYYY-MM-DD |Manish                                     |
 
 _Dates will be updated as we progress through the challenge._
 
