@@ -20,37 +20,36 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 
 ## Project Timeline 📅
 
-| S.No | Project Name                       | Date       | Team                                      |
-| ---- | ---------------------------------- | ---------- | ----------------------------------------- |
-| 1    | Clustering Based Data Augmentation | YYYY-MM-DD | Lokesh Yarramallu, K Kaushik, Madan Gopal |
-| 2    | Handwritten Digits Classification  | YYYY-MM-DD | Karthik R S, Y Madhav                     |
-| 3    | Review Classifier                  | YYYY-MM-DD | Vani Sugovind S.R, Siddharth              |
-| 4    | Sound Emotion Detector             | YYYY-MM-DD | Abhinav M Nair                            |
-| 5    | Movie Recommendation               | YYYY-MM-DD | K. Madhuri, Y. Madhav                     |
-| 6    | Music Genre Classification         | YYYY-MM-DD | Meghana, Snigdha                          |
-| 7    | Clustering Based Ranking System    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 8    | Clustering Based Regression        | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 9    | FaceRecognition-PCA/EigenVector    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 10   | LipNet                             | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 11   | SentenceSimilarityCalculator       | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 12   | SimpleGAN                          | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 13   | FaceSwapping with CV techniques    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 14   | AI Helper (GENAI based Extension)  | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 15   | GENAI based image colorization     | YYYY-MM-DD | SanjitTeja                                |
-| 16   | GestureFlow (CV based Extension)   | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
-| 17   | Medical Insurance PricePrediction  | YYYY-MM-DD | Y. Nitish Reddy                           |
-| 18   | Customer Churn Prediction          | YYYY-MM-DD | Abhinav M Nair                            |
-| 18   | Image Classification of CIFAR-10   | YYYY-MM-DD | Meghana                                   |
-| 19   | Minist Fashion Data Classification | YYYY-MM-DD | Karthik R S                               |
-| 20   | Pokemon Image Classification       | YYYY-MM-DD | Vani Sugovind S.R                         |
-| 21   | Satellite Image analysis           | YYYY-MM-DD | Y. Madhav                                 |
-| 22   | Cold Email Generator               | YYYY-MM-DD | Kaushik                                   |
-| 23   | Named entity recognition           | YYYY-MM-DD | K. Madhuri                                |
-| 24   | Text Summarization using Spacy     | YYYY-MM-DD | Snighdha                                  |
-| 25   | Voice Bot                          | YYYY-MM-DD | Y. Nitish Reddy                           |
-| 26   | Pdf ChatBot                        | YYYY-MM-DD | Kaushik                                   |
-| 27   | Image Classification using VGG16   | YYYY-MM-DD |Lokesh Yarramallu, Madan Gopal             |
-| 28   | Face Recognition Attendance System | YYYY-MM-DD |Manish                                     |
+| S.No | Project Name                              | Date       | Team                                      |
+| ---- | ----------------------------------------- | ---------- | ----------------------------------------- |
+| 1    | Clustering Based Ranking System           | 11-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 2    | Clustering Based Data Augmentation        | 12-08-2023 | Lokesh Yarramallu, K Kaushik, Madan Gopal |
+| 3    | Clustering Based Regression               | 13-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 4    | FaceRecognition Using EigenVectors        | 14-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 5    | Handwritten Digits Classifier             | 15-08-2023 | Karthik R S, Y Madhav                     |
+| 6    | Medical Insurance Price Prediction        | 16-08-2023 | Y. Nitish Reddy                           |
+| 7    | Movie System                              | 17-08-2023 | K. Madhuri, Y. Madhav                     |
+| 8    | Music Genre Classification                | 18-08-2023 | Meghana, Snigdha                          |
+| 9    | Review Classifier                         | 19-08-2023 | Vani Sugovind S.R, Siddharth              |
+| 10   | Sound Emotion Detector                    | 20-08-2023 | Abhinav M Nair                            |
+| 11   | Customer Churn Prediction                 | 21-08-2023 | Abhinav M Nair                            |
+| 12   | FaceSwapping                              | 22-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 13   | Image Classification of CIFAR-10          | 23-08-2023 | Meghana                                   |
+| 14   | LipNet                                    | 24-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 15   | Minist Fashion Data Classification        | 25-08-2023 | Karthik R S                               |
+| 16   | Pokemon Image Classification              | 26-08-2023 | Vani Sugovind S.R                         |
+| 17   | Sentence Similarity Calculator            | 27-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 18   | SimpleGAN                                 | 28-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 19   | Satellite Image Analysis                  | 29-08-2023 | Y. Madhav                                 |
+| 20   | Transfer Learning with VGG                | 30-08-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 21   | Cold-Email Generator                      | 31-08-2023 | Kaushik                                   |
+| 22   | Face Recognition Attendance System        | 01-09-2023 | Manish                                    |
+| 23   | Image Colorizer                           | 02-09-2023 | SanjitTeja                                |
+| 24   | Named Entity Recognition                  | 03-09-2023 | K. Madhuri                                |
+| 25   | Text Summarization                        | 04-09-2023 | Snighdha                                  |
+| 26   | Voice Bot                                 | 05-09-2023 | Y. Nitish Reddy                           |
+| 27   | AI Helper (GENAI based Extension)         | 06-09-2023 | Lokesh Yarramallu, Madan Gopal            |
+| 28   | GestureFlow (CV based Extension)          | 07-09-2023 | Lokesh Yarramallu, Madan Gopal            |
 
 _Dates will be updated as we progress through the challenge._
 
