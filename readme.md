@@ -1,7 +1,3 @@
-Here’s the revised README file for your GitHub repository with the requested changes and some related emojis:
-
----
-
 # AIPulseX: An N-Day Machine Learning and Deep Learning Challenge 🚀
 
 Welcome to the AIPulseX repository! We are a team from the ACM Student Chapter, SIG AI, based at the Amrita School of Computing, Amritapuri. Our mission is to explore and implement various machine learning and deep learning projects over the next **N days**. Each day, we will work on a new project, documenting our progress and results clearly in individual project folders.
@@ -41,6 +37,18 @@ We are the SIG AI team from the ACM Student Chapter at Amrita School of Computin
 | 13   | FaceSwapping with CV techniques    | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 14   | AI Helper (GENAI based Extension)  | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
 | 15   | GENAI based image colorization     | YYYY-MM-DD | SanjitTeja                                |
+| 16   | GestureFlow (CV based Extension)   | YYYY-MM-DD | Lokesh Yarramallu, Madan Gopal            |
+| 17   | Medical Insurance PricePrediction  | YYYY-MM-DD | Y. Nitish Reddy                           |
+| 18   | Customer Churn Prediction          | YYYY-MM-DD | Abhinav M Nair                            |
+| 18   | Image Classification of CIFAR-10   | YYYY-MM-DD | Meghana                                   |
+| 19   | Minist Fashion Data Classification | YYYY-MM-DD | Karthik R S                               |
+| 20   | Pokemon Image Classification       | YYYY-MM-DD | Vani Sugovind S.R                         |
+| 21   | Satellite Image analysis           | YYYY-MM-DD | Y. Madhav                                 |
+| 22   | Cold Email Generator               | YYYY-MM-DD | Kaushik                                   |
+| 23   | Named entity recognition           | YYYY-MM-DD | K. Madhuri                                |
+| 24   | Text Summarization using Spacy     | YYYY-MM-DD | Snighdha                                  |
+| 25   | Voice Bot                          | YYYY-MM-DD | Y. Nitish Reddy                           |
+| 26   | Pdf ChatBot                        | YYYY-MM-DD | Kaushik                                   |
 
 _Dates will be updated as we progress through the challenge._
 
