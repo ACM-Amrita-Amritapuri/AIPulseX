@@ -1,0 +1,2 @@
+This project involves detecting and monitoring floods using satellite imagery and Python. The analysis utilizes tools such as rasterio for handling spatial data, earthpy for spatial plotting, and matplotlib for visualization. The dataset includes satellite images from different periods to identify changes in water bodies. The workflow involves preprocessing the images, applying algorithms to detect floods, and visualizing the results. This approach highlights the utility of satellite data in real-time disaster management and monitoring.
+

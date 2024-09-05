@@ -1,7 +1,3 @@
-Certainly! Here's a `README.md` file for your face-swapping project:
-
----
-
 # Face Swapping with OpenCV, Mediapipe, and Delaunay Triangulation
 
 This project demonstrates how to perform face swapping between two images using OpenCV, Mediapipe, and Delaunay triangulation. The process involves detecting facial landmarks, applying Delaunay triangulation to the face, and seamlessly blending the swapped face onto the target image.
