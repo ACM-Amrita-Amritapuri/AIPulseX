@@ -10,10 +10,8 @@
 - [Usage](#usage)
 - [Challenges](#challenges)
 - [Accomplishments](#accomplishments)
-- [What We Learned](#what-we-learned)
 - [Future Plans](#future-plans)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Inspiration
 The idea behind Chemical Buddy was to create an interactive and accessible tool for students and enthusiasts to easily access chemistry knowledge. The platform aims to provide a personalized learning experience through advanced AI, assisting users with queries, document extraction, and visual aids.
@@ -58,3 +56,28 @@ To run the project locally, follow these steps:
    ```bash
    streamlit run app.py
    ```
+
+## Usage
+- Ask Questions: Enter your chemistry-related questions in the input box, and the AI will generate detailed responses.
+- Upload PDFs: Upload a chemistry-related PDF, and the text will be processed for better understanding.
+- Use Unit Converter: Input values to convert common chemistry units.
+- Search Images: Input chemistry queries to retrieve relevant images from Google.
+
+## Accomplishments
+- Built an AI-powered chatbot that provides accurate chemistry answers.
+- Developed a document upload feature for extracting and utilizing user PDFs.
+- Created a clean, user-friendly interface that makes learning more accessible.
+- Successfully integrated image search for enhanced visual learning.
+
+## Future Plans
+
+- Enhanced AI Capabilities: Further improve the AI's understanding of complex chemistry topics.
+- Broader Topic Coverage: Expand into other branches of science.
+- Interactive Learning: Add features like quizzes and flashcards to make learning more interactive.
+- Mobile Application: Develop a mobile version to provide access to users on the go.
+- Personalization: Implement user profiles and personalized learning experiences.
+
+## Contributing
+
+We welcome contributions! Feel free to open issues or submit pull requests to improve Chemical Buddy.
+
