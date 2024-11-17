@@ -1,0 +1,8 @@
+pip install streamlit
+pip install PyPDF2
+pip install langchain
+pip install faiss-cpu
+pip install google-generativeai
+pip install langchain-google-genai
+pip install requests
+pip install python-dotenv
