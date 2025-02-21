@@ -1,4 +1,4 @@
-# AIPulseX: An N-Day Machine Learning and Deep Learning Challenge 🚀
+# AIPulseX: An 30-Day Machine Learning and Deep Learning Challenge 🚀
 
 Welcome to the AIPulseX repository! We are a team from the ACM Student Chapter, SIG AI, based at the Amrita School of Computing, Amritapuri. Our mission is to explore and implement various machine learning and deep learning projects over the next **N days**. Each day, we will work on a new project, documenting our progress and results clearly in individual project folders.
 
