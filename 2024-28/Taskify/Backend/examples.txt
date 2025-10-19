@@ -1,0 +1,110 @@
+[
+    {
+        "input": "I want to learn RAG systems, I can spend 1 hour per day for 4 weeks",
+        "context": "RAG fundamentals: retrieval module, generation module, vector databases, embedding models, prompt engineering, evaluation metrics",
+        "output": {
+            "title": "4-Week RAG Mastery Plan",
+            "description": "Comprehensive learning path for Retrieval-Augmented Generation with 1 hour daily commitment",
+            "duration_per_day": 60,
+            "total_weeks": 4,
+            "total_duration": 1680,
+            "theme": "technical_learning",
+            "productivity_score": 88,
+            "weeks": [
+                {
+                    "week_number": 1,
+                    "week_title": "RAG Fundamentals & Architecture",
+                    "week_goal": "Understand core concepts and system architecture",
+                    "topics": ["RAG concept & motivation", "Retrieval vs Generation", "System architecture", "Vector databases basics"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "Introduction to RAG", "theory": "30 min - Read RAG papers & concepts", "practice": "30 min - Setup development environment", "duration": 60},
+                        {"day": "Tuesday", "topic": "Retrieval Module Deep Dive", "theory": "25 min - Study retrieval mechanisms", "practice": "35 min - Implement basic retrieval", "duration": 60},
+                        {"day": "Wednesday", "topic": "Generation Module Basics", "theory": "30 min - LLM integration patterns", "practice": "30 min - Test generation APIs", "duration": 60},
+                        {"day": "Thursday", "topic": "Vector Databases", "theory": "20 min - Compare Pinecone, Weaviate, Chroma", "practice": "40 min - Setup vector DB", "duration": 60},
+                        {"day": "Friday", "topic": "Architecture Design", "theory": "25 min - Study RAG architectures", "practice": "35 min - Design your RAG system", "duration": 60}
+                    ]
+                },
+                {
+                    "week_number": 2,
+                    "week_title": "Embeddings & Document Processing",
+                    "week_goal": "Master document chunking and embedding generation",
+                    "topics": ["Text chunking strategies", "Embedding models", "Document preprocessing", "Metadata management"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "Document Chunking", "theory": "25 min - Chunking strategies", "practice": "35 min - Implement chunkers", "duration": 60},
+                        {"day": "Tuesday", "topic": "Embedding Models", "theory": "30 min - Compare embedding models", "practice": "30 min - Test different embeddings", "duration": 60},
+                        {"day": "Wednesday", "topic": "Document Preprocessing", "theory": "20 min - PDF, DOCX processing", "practice": "40 min - Build document pipeline", "duration": 60},
+                        {"day": "Thursday", "topic": "Metadata & Filtering", "theory": "25 min - Metadata strategies", "practice": "35 min - Add metadata to chunks", "duration": 60},
+                        {"day": "Friday", "topic": "Week 2 Project", "theory": "15 min - Review concepts", "practice": "45 min - Build end-to-end doc processor", "duration": 60}
+                    ]
+                },
+                {
+                    "week_number": 3,
+                    "week_title": "Advanced Retrieval & Reranking",
+                    "week_goal": "Implement sophisticated retrieval and reranking techniques",
+                    "topics": ["Hybrid search", "Reranking algorithms", "Query optimization", "Context compression"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "Hybrid Search", "theory": "30 min - Dense + sparse retrieval", "practice": "30 min - Implement hybrid search", "duration": 60},
+                        {"day": "Tuesday", "topic": "Reranking Models", "theory": "25 min - Cross-encoders, bi-encoders", "practice": "35 min - Add reranking layer", "duration": 60},
+                        {"day": "Wednesday", "topic": "Query Optimization", "theory": "20 min - Query expansion, reformulation", "practice": "40 min - Optimize search queries", "duration": 60},
+                        {"day": "Thursday", "topic": "Context Compression", "theory": "30 min - Token optimization techniques", "practice": "30 min - Compress retrieved context", "duration": 60},
+                        {"day": "Friday", "topic": "Week 3 Integration", "theory": "15 min - Review retrieval pipeline", "practice": "45 min - Full retrieval system", "duration": 60}
+                    ]
+                },
+                {
+                    "week_number": 4,
+                    "week_title": "Evaluation & Production Deployment",
+                    "week_goal": "Evaluate RAG performance and deploy to production",
+                    "topics": ["RAG evaluation metrics", "Prompt engineering", "Error handling", "Production deployment"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "Evaluation Metrics", "theory": "30 min - Faithfulness, relevance, RAGAS", "practice": "30 min - Implement evaluation", "duration": 60},
+                        {"day": "Tuesday", "topic": "Prompt Engineering", "theory": "25 min - RAG-specific prompts", "practice": "35 min - Optimize prompts", "duration": 60},
+                        {"day": "Wednesday", "topic": "Error Handling", "theory": "20 min - Fallback strategies", "practice": "40 min - Add error handling", "duration": 60},
+                        {"day": "Thursday", "topic": "Production Setup", "theory": "25 min - Deployment best practices", "practice": "35 min - Containerize RAG app", "duration": 60},
+                        {"day": "Friday", "topic": "Final Project", "theory": "10 min - Review entire journey", "practice": "50 min - Deploy complete RAG system", "duration": 60}
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "input": "Learn full-stack web development, 2 hours daily for 8 weeks",
+        "context": "HTML, CSS, JavaScript, React, Node.js, Express, MongoDB, REST APIs, authentication, deployment",
+        "output": {
+            "title": "8-Week Full-Stack Developer Bootcamp",
+            "description": "Intensive full-stack web development learning path with hands-on projects",
+            "duration_per_day": 120,
+            "total_weeks": 8,
+            "total_duration": 6720,
+            "theme": "web_development",
+            "productivity_score": 90,
+            "weeks": [
+                {
+                    "week_number": 1,
+                    "week_title": "Frontend Fundamentals - HTML & CSS",
+                    "week_goal": "Master HTML5 and CSS3 for responsive web design",
+                    "topics": ["HTML5 semantics", "CSS Grid & Flexbox", "Responsive design", "CSS animations"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "HTML5 Basics", "theory": "45 min - HTML structure, semantics", "practice": "75 min - Build portfolio page", "duration": 120},
+                        {"day": "Tuesday", "topic": "CSS Fundamentals", "theory": "40 min - Selectors, box model, positioning", "practice": "80 min - Style portfolio page", "duration": 120},
+                        {"day": "Wednesday", "topic": "Flexbox Layout", "theory": "35 min - Flexbox properties", "practice": "85 min - Create responsive navbar", "duration": 120},
+                        {"day": "Thursday", "topic": "CSS Grid", "theory": "40 min - Grid layout system", "practice": "80 min - Build grid-based layouts", "duration": 120},
+                        {"day": "Friday", "topic": "Week 1 Project", "theory": "30 min - Review & plan", "practice": "90 min - Complete responsive website", "duration": 120}
+                    ]
+                },
+                {
+                    "week_number": 2,
+                    "week_title": "JavaScript Fundamentals",
+                    "week_goal": "Learn JavaScript ES6+ and DOM manipulation",
+                    "topics": ["JS syntax & types", "Functions & scope", "DOM manipulation", "Events & async"],
+                    "daily_sessions": [
+                        {"day": "Monday", "topic": "JavaScript Basics", "theory": "50 min - Variables, types, operators", "practice": "70 min - Coding exercises", "duration": 120},
+                        {"day": "Tuesday", "topic": "Functions & Scope", "theory": "45 min - Functions, closures, scope", "practice": "75 min - Build calculator app", "duration": 120},
+                        {"day": "Wednesday", "topic": "DOM Manipulation", "theory": "40 min - DOM API, selectors", "practice": "80 min - Interactive to-do list", "duration": 120},
+                        {"day": "Thursday", "topic": "Events & Async", "theory": "45 min - Event handling, promises", "practice": "75 min - Async data fetching", "duration": 120},
+                        {"day": "Friday", "topic": "Week 2 Project", "theory": "30 min - ES6+ features", "practice": "90 min - Interactive web app", "duration": 120}
+                    ]
+                }
+            ]
+        }
+    }
+]

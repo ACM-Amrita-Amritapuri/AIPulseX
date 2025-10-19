@@ -1,0 +1,8 @@
+# Environment variables
+.env
+.venv/
+__pycache__/
+
+# Google Cloud credentials
+gen-lang-client-*.json
+*.json

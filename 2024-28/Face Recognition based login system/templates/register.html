@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Lock · Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script defer src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</head>
+<body data-page="register">
+    <noscript>
+        <div class="noscript-banner">This experience requires JavaScript and camera access. Please enable both to continue.</div>
+    </noscript>
+    <div class="app-shell">
+        <header class="top-nav">
+            <div class="brand">Nebula Lock</div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-links" aria-label="Primary">
+                <a href="/" class="nav-link" data-route="home">Home</a>
+            </nav>
+        </header>
+
+        <main class="page-main">
+            <section class="panel-panel" data-animate>
+                <div class="panel-heading">
+                    <h1>Spin up your Nebula Lock profile</h1>
+                    <p>Pair your credentials with a guided biometric capture whenever you feel ready, all within a calm, focused flow.</p>
+                </div>
+                <div class="panel-content grid-two">
+                    <form id="registerForm" class="card" autocomplete="off">
+                        <div class="form-group">
+                            <label for="registerUsername">Username</label>
+                            <input type="text" id="registerUsername" name="username" placeholder="Choose a handle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" name="password" placeholder="Create a strong password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerConfirm">Confirm Password</label>
+                            <input type="password" id="registerConfirm" name="confirm_password" placeholder="Repeat your password" required>
+                        </div>
+                        <div class="form-group inline">
+                            <button type="button" class="btn btn-secondary" id="registerEnableFace">Enable face authentication</button>
+                            <span class="status-chip" id="registerEnableStatus">Face capture inactive</span>
+                        </div>
+                        <div class="form-group inline">
+                            <button type="button" class="btn btn-secondary" id="registerCapture" disabled>Capture snapshot</button>
+                            <span class="status-chip" id="registerCaptureStatus">No capture yet</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary full">Complete enrollment</button>
+                        <p class="helper-text">Passwords are hashed and embeddings are stored securely on the server.</p>
+                        <p class="helper-text">Already enrolled? <a href="/login">Sign in here</a>.</p>
+                    </form>
+
+                    <div class="card live-card" data-face-wrapper hidden>
+                        <div class="video-wrapper">
+                            <video id="registerVideo" playsinline muted></video>
+                            <canvas id="registerCanvas" aria-hidden="true"></canvas>
+                            <div class="video-overlay">
+                                <p id="registerInstruction">Camera inactive until you enable enrollment.</p>
+                                <span class="badge" id="registerStatus">Camera idle</span>
+                            </div>
+                        </div>
+                        <div class="tips">
+                            <p class="tips-title">Capture tips</p>
+                            <ul>
+                                <li>Use even lighting with minimal shadows.</li>
+                                <li>Keep the camera at eye level.</li>
+                                <li>Remove obstructions covering your face.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© {{ config.get('APP_NAME', 'Nebula Lock') }} {{ config.get('APP_YEAR', '2025') }}. Built for delightful, dependable sign-ins.</p>
+        </footer>
+    </div>
+
+    <div class="modal-layer" data-modal-layer hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-live="assertive">
+            <div class="modal-header">
+                <h3 id="modalTitle">Status</h3>
+                <button class="modal-close" data-modal-close aria-label="Close status dialog">×</button>
+            </div>
+            <p id="modalMessage">...</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" data-modal-close>Close</button>
+                <button class="btn btn-primary" id="modalPrimaryAction" hidden>Continue</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

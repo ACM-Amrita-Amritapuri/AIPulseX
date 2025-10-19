@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activity History - Taskify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      :root {
+        --primary-color: #e0e6f1;
+        --primary-dark: #c7d2fe;
+        --secondary-color: #a1a1aa;
+        --success-color: #4ade80;
+        --warning-color: #fbbf24;
+        --error-color: #f87171;
+        --bg-primary: rgba(10, 10, 12, 0.4);
+        --bg-secondary: rgba(224, 230, 241, 0.05);
+        --bg-tertiary: rgba(224, 230, 241, 0.1);
+        --text-primary: #e0e6f1;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --border-color: rgba(224, 230, 241, 0.2);
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --radius: 0.5rem;
+        --transition: all 0.2s ease-in-out;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .activity-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .activity-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      .back-link:hover {
+        color: var(--primary-dark);
+      }
+
+      .activity-content {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+      }
+
+      .activity-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .activity-subtitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .refresh-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .refresh-button:hover {
+        background: var(--primary-dark);
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: var(--bg-primary);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+      }
+
+      .activity-item:hover {
+        box-shadow: var(--shadow-sm);
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+      }
+
+      .activity-icon.login {
+        background: #eff6ff;
+        color: #2563eb;
+      }
+
+      .activity-icon.upload {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+
+      .activity-icon.schedule {
+        background: #fffbeb;
+        color: #d97706;
+      }
+
+      .activity-icon.logout {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .activity-content-details {
+        flex: 1;
+      }
+
+      .activity-message {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .activity-details {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .activity-timestamp {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+      }
+
+      .filter-select {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+      }
+
+      .search-input {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+      }
+
+      @media (max-width: 768px) {
+        .activity-container {
+          padding: 1rem;
+        }
+
+        .filter-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .activity-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="activity-container">
+      <div class="activity-header">
+        <h1 class="activity-title">Activity History</h1>
+        <a href="{{ url_for('dashboard') }}" class="back-link">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <div class="activity-content">
+        <div class="activity-header-content">
+          <h3 class="activity-subtitle">User Activity</h3>
+          <button class="refresh-button" onclick="refreshActivity()">
+            Refresh
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <select class="filter-select" id="typeFilter">
+            <option value="">All Activities</option>
+            <option value="login">Login</option>
+            <option value="upload">Upload</option>
+            <option value="schedule">Schedule</option>
+            <option value="logout">Logout</option>
+          </select>
+          <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="Search activities..."
+          />
+        </div>
+
+        <div id="activityContainer">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <p>No activity history available</p>
+            <p>Your activities will appear here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Mock activity data for demonstration
+      const mockActivities = [
+        {
+          id: "1",
+          type: "login",
+          message: "User logged in successfully",
+          details: "IP: 192.168.1.100, Browser: Chrome",
+          timestamp: "2024-01-15 10:30:25",
+        },
+        {
+          id: "2",
+          type: "upload",
+          message: "Document uploaded",
+          details: "File: project_requirements.pdf, Size: 2.4MB",
+          timestamp: "2024-01-15 10:28:15",
+        },
+        {
+          id: "3",
+          type: "schedule",
+          message: "Schedule generated",
+          details: "Schedule ID: sched_123, Tasks: 5",
+          timestamp: "2024-01-15 10:20:30",
+        },
+        {
+          id: "4",
+          type: "upload",
+          message: "Document processed",
+          details: "File: meeting_notes.docx, Chunks: 24",
+          timestamp: "2024-01-15 10:15:18",
+        },
+        {
+          id: "5",
+          type: "schedule",
+          message: "Schedule exported",
+          details: "Format: PDF, Schedule ID: sched_123",
+          timestamp: "2024-01-15 10:10:45",
+        },
+        {
+          id: "6",
+          type: "logout",
+          message: "User logged out",
+          details: "Session duration: 2h 15m",
+          timestamp: "2024-01-15 09:45:00",
+        },
+      ];
+
+      // Load activities on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadActivities();
+      });
+
+      // Filter functionality
+      document
+        .getElementById("typeFilter")
+        .addEventListener("change", filterActivities);
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", filterActivities);
+
+      function loadActivities() {
+        const container = document.getElementById("activityContainer");
+
+        if (mockActivities.length === 0) {
+          container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No activity history available</p>
+                        <p>Your activities will appear here</p>
+                    </div>
+                `;
+        } else {
+          container.innerHTML = mockActivities
+            .map((activity) => createActivityHTML(activity))
+            .join("");
+        }
+      }
+
+      function createActivityHTML(activity) {
+        const iconMap = {
+          login: "◉",
+          upload: "▰",
+          schedule: "◧",
+          logout: "→",
+        };
+
+        return `
+                <div class="activity-item" data-type="${
+                  activity.type
+                }" data-content="${activity.message.toLowerCase()} ${activity.details.toLowerCase()}">
+                    <div class="activity-icon ${activity.type}">${
+          iconMap[activity.type]
+        }</div>
+                    <div class="activity-content-details">
+                        <div class="activity-message">${activity.message}</div>
+                        <div class="activity-details">${activity.details}</div>
+                    </div>
+                    <div class="activity-timestamp">${activity.timestamp}</div>
+                </div>
+            `;
+      }
+
+      function filterActivities() {
+        const typeFilter = document.getElementById("typeFilter").value;
+        const searchQuery = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const activityItems = document.querySelectorAll(".activity-item");
+
+        activityItems.forEach((item) => {
+          const type = item.getAttribute("data-type");
+          const content = item.getAttribute("data-content");
+
+          const typeMatch = !typeFilter || type === typeFilter;
+          const searchMatch = !searchQuery || content.includes(searchQuery);
+
+          if (typeMatch && searchMatch) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+
+      function refreshActivity() {
+        // TODO: Implement real-time activity refresh
+        loadActivities();
+        alert("Activity history refreshed!");
+      }
+    </script>
+  </body>
+</html>

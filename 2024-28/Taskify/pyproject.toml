@@ -1,0 +1,25 @@
+[project]
+name = "schedule-gen"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "docx2txt>=0.9",
+    "flask>=3.1.2",
+    "flask-compress>=1.18",
+    "flask-cors>=6.0.1",
+    "flask-jwt-extended>=4.7.1",
+    "groq>=0.32.0",
+    "langchain>=0.3.27",
+    "langchain-community>=0.3.30",
+    "langchain-google-genai>=2.1.12",
+    "langchain-groq>=0.3.8",
+    "langchain-pinecone>=0.2.12",
+    "pinecone>=7.3.0",
+    "pymongo>=4.15.2",
+    "pypdf>=6.1.1",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.1.1",
+    "werkzeug>=3.1.3",
+]

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taskify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="particle-container">
+      <div class="particle p1"></div>
+      <div class="particle p2"></div>
+      <div class="particle p3"></div>
+      <div class="particle p4"></div>
+      <div class="particle p5"></div>
+      <div class="particle p6"></div>
+      <div class="particle p7"></div>
+      <div class="particle p8"></div>
+    </div>
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <div class="container">
+      <header>
+        <h1>Welcome to Taskify</h1>
+        <p>Your intelligent assistant for managing tasks and schedules.</p>
+      </header>
+      <main>
+        <div class="buttons">
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary"
+            >Login</a
+          >
+          <a href="{{ url_for('auth.register') }}" class="btn btn-secondary"
+            >Register</a
+          >
+        </div>
+      </main>
+      <footer>
+        <p>&copy; 2025 Taskify. All rights reserved.</p>
+      </footer>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Schedule Assistant - Taskify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      :root {
+        --primary-color: #e0e6f1;
+        --primary-dark: #c7d2fe;
+        --secondary-color: #a1a1aa;
+        --success-color: #4ade80;
+        --warning-color: #fbbf24;
+        --error-color: #f87171;
+        --bg-primary: rgba(10, 10, 12, 0.4);
+        --bg-secondary: rgba(224, 230, 241, 0.05);
+        --bg-tertiary: rgba(224, 230, 241, 0.1);
+        --text-primary: #e0e6f1;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --border-color: rgba(224, 230, 241, 0.2);
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --radius: 0.5rem;
+        --transition: all 0.2s ease-in-out;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .chat-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        height: calc(100vh - 4rem);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .chat-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .chat-title::before {
+        content: "🤖";
+        font-size: 1.5rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+      }
+
+      .back-link:hover {
+        color: var(--primary-dark);
+        background: var(--bg-tertiary);
+      }
+
+      .clear-btn {
+        background: var(--error-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .clear-btn:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+      }
+
+      .chat-main {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .chat-area {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-height: calc(100vh - 300px);
+      }
+
+      .message {
+        display: flex;
+        gap: 0.75rem;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .message.user {
+        flex-direction: row-reverse;
+      }
+
+      .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+
+      .message.user .message-avatar {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .message.bot .message-avatar {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .message-content {
+        flex: 1;
+        max-width: 70%;
+      }
+
+      .message.user .message-content {
+        text-align: right;
+      }
+
+      .message-bubble {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 0.75rem 1rem;
+        word-wrap: break-word;
+        position: relative;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .message.user .message-bubble {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border-color: #4f46e5;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+      }
+
+      .message.bot .message-bubble {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+      }
+
+      .message-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .message.user .message-time {
+        text-align: right;
+      }
+
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .suggestion-chip {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .suggestion-chip:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .schedule-preview {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-top: 0.5rem;
+      }
+
+      .schedule-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .schedule-preview h4 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .productivity-score {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .score-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .score-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .schedule-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+      }
+
+      .stat {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+
+      .stat-text {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .tasks-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .task-item {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 0.75rem;
+        border-left: 3px solid var(--primary-color);
+      }
+
+      .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+      }
+
+      .task-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+      }
+
+      .task-name {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .task-priority {
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .priority-high {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .priority-medium {
+        background: #fef3c7;
+        color: #d97706;
+      }
+
+      .priority-low {
+        background: #d1fae5;
+        color: #059669;
+      }
+
+      .task-time {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      .task-description {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+
+      .chat-input-area {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-primary);
+      }
+
+      .chat-input-container {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+      }
+
+      .chat-input {
+        flex: 1;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 1rem;
+        resize: none;
+        min-height: 44px;
+        max-height: 120px;
+        transition: var(--transition);
+      }
+
+      .chat-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+      }
+
+      .send-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .send-btn:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .sidebar-section {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+      }
+
+      .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .quick-action {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 0.75rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+        cursor: pointer;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .quick-action:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+      }
+
+      .schedule-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .stat-item:last-child {
+        border-bottom: none;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .stat-value {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-style: italic;
+        padding: 0.5rem 0;
+      }
+
+      .typing-dots {
+        display: flex;
+        gap: 0.25rem;
+      }
+
+      .typing-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      .typing-dot:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes typing {
+        0%,
+        80%,
+        100% {
+          transform: scale(0.8);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .message.user {
+        animation: slideInRight 0.3s ease-out;
+      }
+
+      .message.bot {
+        animation: slideInLeft 0.3s ease-out;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      @media (max-width: 768px) {
+        .chat-main {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          order: -1;
+        }
+
+        .chat-container {
+          padding: 1rem;
+        }
+
+        .chat-messages {
+          max-height: calc(100vh - 400px);
+        }
+
+        .message-content {
+          max-width: 85%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1 class="chat-title">AI Schedule Assistant</h1>
+        <div class="header-actions">
+          <button class="clear-btn" onclick="clearChatHistory()">
+            Clear Chat
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="back-link">
+            ← Back to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <div class="chat-main">
+        <div class="chat-area">
+          <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+              <div class="message-avatar">🤖</div>
+              <div class="message-content">
+                <div class="message-bubble">
+                  Hello! I'm your AI schedule assistant. I can help you create
+                  schedules, answer questions about your tasks, and provide time
+                  management advice. How can I help you today?
+                </div>
+                <div class="message-time" id="welcomeTime"></div>
+                <div class="suggestions">
+                  <span
+                    class="suggestion-chip"
+                    onclick="sendSuggestion('Create a schedule for my work day')"
+                    >Create a schedule</span
+                  >
+                  <span
+                    class="suggestion-chip"
+                    onclick="sendSuggestion('Show me my existing schedules')"
+                    >View schedules</span
+                  >
+                  <span
+                    class="suggestion-chip"
+                    onclick="sendSuggestion('Help me with time management')"
+                    >Get tips</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="typing-indicator" id="typingIndicator">
+            <div class="message-avatar">🤖</div>
+            <div class="typing-dots">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+            <span>AI is thinking...</span>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="chat-input-container">
+              <textarea
+                id="chatInput"
+                class="chat-input"
+                placeholder="Ask me anything about scheduling or describe what you need to do..."
+                rows="1"
+              ></textarea>
+              <button id="sendBtn" class="send-btn" onclick="sendMessage()">
+                <span>Send</span>
+                <span>📤</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">
+              <span>⚡</span>
+              Quick Actions
+            </h3>
+            <div class="quick-actions">
+              <button
+                class="quick-action"
+                onclick="sendSuggestion('Create a work schedule for today')"
+              >
+                ◧ Work Schedule
+              </button>
+              <button
+                class="quick-action"
+                onclick="sendSuggestion('Plan my study session')"
+              >
+                ◭ Study Plan
+              </button>
+              <button
+                class="quick-action"
+                onclick="sendSuggestion('Organize my daily routine')"
+              >
+                🏃 Daily Routine
+              </button>
+              <button
+                class="quick-action"
+                onclick="sendSuggestion('Show me my schedules')"
+              >
+                📋 View Schedules
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">
+              <span>📊</span>
+              Schedule Stats
+            </h3>
+            <div class="schedule-stats" id="scheduleStats">
+              <div class="stat-item">
+                <span class="stat-label">Total Schedules</span>
+                <span class="stat-value" id="totalSchedules">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Total Tasks</span>
+                <span class="stat-value" id="totalTasks">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Active Schedules</span>
+                <span class="stat-value" id="activeSchedules">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize chat
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set welcome message time
+        const welcomeTimeEl = document.getElementById("welcomeTime");
+        if (welcomeTimeEl) {
+          welcomeTimeEl.textContent = new Date().toLocaleTimeString();
+        }
+
+        // Load chat history from server
+        loadChatHistory();
+
+        // Load schedule stats
+        loadScheduleStats();
+
+        // Check for pending message from dashboard
+        const pendingMessage = sessionStorage.getItem('pendingMessage');
+        if (pendingMessage) {
+          // Clear from sessionStorage
+          sessionStorage.removeItem('pendingMessage');
+          // Set in input and send
+          const chatInput = document.getElementById("chatInput");
+          chatInput.value = pendingMessage;
+          // Small delay to ensure everything is loaded
+          setTimeout(() => {
+            sendMessage();
+          }, 500);
+        }
+
+        // Auto-resize textarea
+        const chatInput = document.getElementById("chatInput");
+        chatInput.addEventListener("input", function () {
+          this.style.height = "auto";
+          this.style.height = Math.min(this.scrollHeight, 120) + "px";
+        });
+
+        // Send message on Enter (but allow Shift+Enter for new lines)
+        chatInput.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+
+        // Focus on input field
+        chatInput.focus();
+      });
+
+      async function sendMessage() {
+        const chatInput = document.getElementById("chatInput");
+        const message = chatInput.value.trim();
+
+        if (!message) {
+          chatInput.focus();
+          return;
+        }
+
+        // Add user message to chat immediately
+        addMessageToChat(message, "user");
+
+        // Clear input and reset height
+        chatInput.value = "";
+        chatInput.style.height = "auto";
+        
+        // Disable send button
+        const sendBtn = document.getElementById("sendBtn");
+        const originalBtnContent = sendBtn.innerHTML;
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span>Sending...</span><span>⏳</span>';
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        try {
+          const response = await fetch("/scheduler/api/chat/message", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: message }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Hide typing indicator
+            hideTypingIndicator();
+
+            // Add bot response to chat
+            addBotResponseToChat(data);
+
+            // Update schedule stats if a schedule was created
+            if (data.type === "schedule_created" || data.intent === "schedule_creation") {
+              loadScheduleStats();
+            }
+          } else {
+            throw new Error(data.error || "Failed to send message");
+          }
+        } catch (error) {
+          console.error("Error sending message:", error);
+          hideTypingIndicator();
+          
+          // Show error message in chat
+          const errorResponse = {
+            message: "Sorry, I encountered an error processing your message. Please try again.",
+            suggestions: ["Try again", "View schedules", "Get help"]
+          };
+          addBotResponseToChat(errorResponse);
+        } finally {
+          // Re-enable send button and restore content
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = originalBtnContent;
+          chatInput.focus();
+        }
+      }
+
+      function sendSuggestion(suggestion) {
+        document.getElementById("chatInput").value = suggestion;
+        sendMessage();
+      }
+
+      function addMessageToChat(message, sender) {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+
+        const avatar = sender === "user" ? "👤" : "🤖";
+        const time = new Date().toLocaleTimeString();
+
+        // Escape HTML to prevent XSS but preserve line breaks
+        const escapedMessage = escapeHtml(message).replace(/\n/g, '<br>');
+
+        messageDiv.innerHTML = `
+          <div class="message-avatar">${avatar}</div>
+          <div class="message-content">
+            <div class="message-bubble">${escapedMessage}</div>
+            <div class="message-time">${time}</div>
+          </div>
+        `;
+
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      function addBotResponseToChat(response) {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message bot";
+
+        const time = new Date().toLocaleTimeString();
+
+        // Escape the message to prevent XSS but preserve line breaks
+        const escapedMessage = escapeHtml(response.message || '').replace(/\n/g, '<br>');
+
+        let suggestionsHTML = "";
+        if (response.suggestions && response.suggestions.length > 0) {
+          suggestionsHTML = `
+            <div class="suggestions">
+              ${response.suggestions
+                .map(
+                  (suggestion) =>
+                    `<span class="suggestion-chip" onclick="sendSuggestion('${escapeHtml(suggestion)}')">${escapeHtml(suggestion)}</span>`
+                )
+                .join("")}
+            </div>
+          `;
+        }
+
+        let schedulePreviewHTML = "";
+        if (response.schedule) {
+          const tasks = response.schedule.tasks || [];
+          const productivityScore = response.schedule.productivity_score || 75;
+
+          schedulePreviewHTML = `
+             <div class="schedule-preview">
+               <div class="schedule-header">
+                 <h4>${escapeHtml(response.schedule.title || 'Schedule')}</h4>
+                 <div class="productivity-score">
+                   <span class="score-label">Productivity Score</span>
+                   <span class="score-value">${productivityScore}/100</span>
+                 </div>
+               </div>
+               <div class="schedule-stats">
+                 <div class="stat">
+                   <span class="stat-text">${Math.floor(
+                     response.schedule.total_duration / 60
+                   )}h ${response.schedule.total_duration % 60}m</span>
+                 </div>
+                 <div class="stat">
+                   <span class="stat-text">${tasks.length} tasks</span>
+                 </div>
+                 <div class="stat">
+                   <span class="stat-text">${
+                     response.schedule.break_time
+                   }m breaks</span>
+                 </div>
+               </div>
+               <div class="tasks-container">
+                 ${tasks
+                   .map(
+                     (task) => `
+                   <div class="task-item">
+                     <div class="task-header">
+                       <div class="task-title">
+                         <span class="task-name">${escapeHtml(task.title || '')}</span>
+                         <span class="task-priority priority-${task.priority}">${escapeHtml(task.priority || '')}</span>
+                       </div>
+                       <div class="task-time">${escapeHtml(task.start_time || '')} - ${escapeHtml(task.end_time || '')}</div>
+                     </div>
+                     <div class="task-description">${escapeHtml(task.description || '')}</div>
+                   </div>
+                 `
+                   )
+                   .join("")}
+               </div>
+             </div>
+           `;
+        }
+
+        messageDiv.innerHTML = `
+          <div class="message-avatar">🤖</div>
+          <div class="message-content">
+            <div class="message-bubble">
+              ${escapedMessage}
+              ${schedulePreviewHTML}
+            </div>
+            <div class="message-time">${time}</div>
+            ${suggestionsHTML}
+          </div>
+        `;
+
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      function showTypingIndicator() {
+        document.getElementById("typingIndicator").style.display = "flex";
+        scrollToBottom();
+      }
+
+      function hideTypingIndicator() {
+        document.getElementById("typingIndicator").style.display = "none";
+      }
+
+      function scrollToBottom() {
+        const chatMessages = document.getElementById("chatMessages");
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      async function loadChatHistory() {
+        try {
+          const response = await fetch("/scheduler/api/chat/history");
+          if (response.ok) {
+            const history = await response.json();
+            const chatMessages = document.getElementById("chatMessages");
+
+            // Clear welcome message if there's history
+            if (history.length > 0) {
+              chatMessages.innerHTML = "";
+              
+              // Add history messages
+              history.forEach((entry) => {
+                addMessageToChat(entry.user_message, "user");
+                if (entry.bot_response) {
+                  addBotResponseToChat(entry.bot_response);
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error loading chat history:", error);
+        }
+      }
+
+      async function loadScheduleStats() {
+        try {
+          const response = await fetch("/scheduler/api/chat/schedules");
+          if (response.ok) {
+            const schedules = await response.json();
+            const totalTasks = schedules.reduce(
+              (sum, schedule) => sum + (schedule.tasks?.length || 0),
+              0
+            );
+            const activeSchedules = schedules.filter(
+              (schedule) => schedule.status === "active"
+            ).length;
+
+            document.getElementById("totalSchedules").textContent =
+              schedules.length;
+            document.getElementById("totalTasks").textContent = totalTasks;
+            document.getElementById("activeSchedules").textContent =
+              activeSchedules;
+          }
+        } catch (error) {
+          console.error("Error loading schedule stats:", error);
+        }
+      }
+
+      async function clearChatHistory() {
+        if (confirm("Are you sure you want to clear the chat history?")) {
+          try {
+            const response = await fetch("/scheduler/api/chat/clear-history", {
+              method: "POST",
+            });
+
+            if (response.ok) {
+              // Reload the page to show fresh welcome message
+              location.reload();
+            } else {
+              alert("Failed to clear chat history");
+            }
+          } catch (error) {
+            console.error("Error clearing chat history:", error);
+            alert("Error clearing chat history");
+          }
+        }
+      }
+
+      // Helper function to escape HTML and prevent XSS
+      function escapeHtml(text) {
+        const map = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+      }
+    </script>
+  </body>
+</html>

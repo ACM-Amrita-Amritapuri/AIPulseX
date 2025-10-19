@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Documents - Taskify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+            color: #e0e6f1;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated particles background */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(224, 230, 241, 0.6);
+            border-radius: 50%;
+            animation: particle-float 8s ease-in-out infinite;
+        }
+
+        .particle.p1 { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle.p2 { top: 40%; left: 20%; animation-delay: 1s; }
+        .particle.p3 { top: 60%; left: 30%; animation-delay: 2s; }
+        .particle.p4 { top: 80%; left: 40%; animation-delay: 3s; }
+        .particle.p5 { top: 30%; left: 60%; animation-delay: 4s; }
+        .particle.p6 { top: 50%; left: 70%; animation-delay: 5s; }
+        .particle.p7 { top: 70%; left: 80%; animation-delay: 6s; }
+        .particle.p8 { top: 10%; left: 90%; animation-delay: 7s; }
+
+        @keyframes particle-float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+
+        .page-container {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .header-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.5));
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #e0e6f1;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .back-link:hover {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.5) 0%, rgba(99, 102, 241, 0.5) 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(79, 70, 229, 0.3);
+            border-color: rgba(129, 140, 248, 0.5);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            margin-top: 0.75rem;
+            color: rgba(224, 230, 241, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin: 1.5rem 0 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(15,23,42,.5);
+            border: 1px solid rgba(148,163,184,.25);
+            color: #e0e6f1;
+            padding: .7rem 1rem;
+            border-radius: 10px;
+            outline: none;
+            transition: .2s border-color ease;
+        }
+
+        .search-input:focus { border-color: rgba(96,165,250,.6); }
+
+        .sort-select {
+            background: rgba(15,23,42,.5);
+            border: 1px solid rgba(148,163,184,.25);
+            color: #cbd5e1;
+            padding: .6rem .8rem;
+            border-radius: 10px;
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .document-card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(2,6,23,.6), rgba(15,23,42,.65));
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            border-radius: 14px;
+            padding: 1.25rem 1.25rem 1rem;
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            overflow: hidden;
+        }
+
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(2, 6, 23, 0.45);
+            border-color: rgba(96,165,250,.55);
+        }
+
+        .doc-icon {
+            font-size: 2.75rem;
+            margin-bottom: .85rem;
+        }
+
+        .doc-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #e0e6f1;
+            word-break: break-word;
+        }
+
+        .doc-info {
+            font-size: 0.9rem;
+            color: rgba(224, 230, 241, 0.7);
+            margin: 0.3rem 0;
+        }
+
+        .doc-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            border: 1px solid transparent;
+        }
+
+        .doc-type-pdf {
+            background: rgba(239, 68, 68, 0.18);
+            color: #fca5a5;
+            border-color: rgba(239,68,68,.35);
+        }
+
+        .doc-type-docx {
+            background: rgba(59, 130, 246, 0.18);
+            color: #93c5fd;
+            border-color: rgba(59,130,246,.35);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(30, 58, 138, 0.2);
+            border: 2px dashed rgba(96, 165, 250, 0.3);
+            border-radius: 12px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: rgba(224, 230, 241, 0.7);
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 My Documents <span class="chip">Your uploads</span></h1>
+            <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalDocs">{{ documents|length }}</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search documents by name or type..." />
+            <select id="sortSelect" class="sort-select">
+                <option value="recent">Sort: Most recent</option>
+                <option value="name">Sort: Name (A→Z)</option>
+                <option value="type">Sort: Type</option>
+            </select>
+        </div>
+
+        {% if documents %}
+        <div class="documents-grid">
+            {% for doc in documents %}
+            <div class="document-card" data-name="{{ doc.filename|lower }}" data-type="{{ doc.doc_type|lower }}" data-time="{{ doc.upload_time }}">
+                <div class="doc-icon">
+                    {% if doc.doc_type == 'pdf' %}📕{% else %}📘{% endif %}
+                </div>
+                <div class="doc-name">{{ doc.filename }}</div>
+                <div class="doc-info">⏰ Uploaded: <span class="upload-date">{{ doc.upload_time }}</span></div>
+                <span class="doc-type-badge doc-type-{{ doc.doc_type }}">
+                    {{ doc.doc_type|upper }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>No documents uploaded yet</p>
+            <p>Go to the dashboard and click "📄 Upload Docs" to upload your first document</p>
+        </div>
+        {% endif %}
+    </div>
+        <script>
+            // Format dates and enable search/sort
+            (function(){
+                const cards = Array.from(document.querySelectorAll('.document-card'));
+                const searchInput = document.getElementById('searchInput');
+                const sortSelect = document.getElementById('sortSelect');
+
+                // Date formatting
+                document.querySelectorAll('.upload-date').forEach(el => {
+                    const iso = el.textContent && el.textContent.trim();
+                    if (!iso) return;
+                    try {
+                        const d = new Date(iso);
+                        if (!isNaN(d)) {
+                            el.textContent = d.toISOString().slice(0,10);
+                        }
+                    } catch {}
+                });
+
+                // Filtering
+                function applyFilter(){
+                    const q = (searchInput?.value || '').toLowerCase();
+                    cards.forEach(card => {
+                        const name = card.dataset.name || '';
+                        const type = card.dataset.type || '';
+                        card.style.display = (name.includes(q) || type.includes(q)) ? '' : 'none';
+                    });
+                }
+                searchInput?.addEventListener('input', applyFilter);
+
+                // Sorting
+                function applySort(){
+                    const value = sortSelect?.value || 'recent';
+                    const grid = document.querySelector('.documents-grid');
+                    const sorted = [...cards].sort((a,b)=>{
+                        if (value === 'name') {
+                            return (a.dataset.name||'').localeCompare(b.dataset.name||'');
+                        }
+                        if (value === 'type') {
+                            return (a.dataset.type||'').localeCompare(b.dataset.type||'');
+                        }
+                        // recent by upload time (fallback keep order)
+                        return (b.dataset.time||'').localeCompare(a.dataset.time||'');
+                    });
+                    sorted.forEach(el=>grid.appendChild(el));
+                }
+                sortSelect?.addEventListener('change', applySort);
+
+                // Initial apply
+                applySort();
+            })();
+        </script>
+</body>
+</html>

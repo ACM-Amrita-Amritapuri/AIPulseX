@@ -1,0 +1,16 @@
+Flask
+Flask-CORS
+Flask-Compress
+Werkzeug
+pymongo
+python-dotenv
+Flask-JWT-Extended
+langchain
+langchain-community
+langchain-google-genai
+pinecone
+langchain-pinecone
+pypdf
+python-docx
+docx2txt
+langchain-groq

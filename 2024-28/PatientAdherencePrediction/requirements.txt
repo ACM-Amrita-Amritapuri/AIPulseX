@@ -1,0 +1,9 @@
+scikit-learn==1.6.1
+joblib==1.5.2
+numpy==1.26.2
+pandas==2.3.3
+streamlit==1.50.0
+cloudpickle==2.2.1
+
+
+

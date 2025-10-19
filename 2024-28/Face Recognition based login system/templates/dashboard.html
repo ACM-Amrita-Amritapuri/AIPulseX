@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Lock · Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script defer src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</head>
+<body data-page="dashboard">
+    <noscript>
+        <div class="noscript-banner">This experience requires JavaScript and camera access. Please enable both to continue.</div>
+    </noscript>
+    <div class="app-shell">
+        <header class="top-nav">
+            <div class="brand">Nebula Lock</div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-links" aria-label="Primary">
+                <a href="/" class="nav-link" data-route="home">Home</a>
+            </nav>
+        </header>
+
+        <main class="page-main">
+            <section class="panel-panel dashboard-main" data-animate>
+                <div class="dashboard-header">
+                    <div>
+                        <h1>Welcome back, {{ username or 'Explorer' }}</h1>
+                        <p class="dashboard-subtitle">Your secure session is active</p>
+                    </div>
+                    <a href="/" class="btn btn-ghost">Sign out</a>
+                </div>
+
+                <div class="dashboard-layout">
+                    <!-- Session Status Card -->
+                    <article class="status-card">
+                        <div class="status-header">
+                            <h2>Session Status</h2>
+                            <span class="status-badge active">Active</span>
+                        </div>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-icon" data-status="success">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M16.667 5L7.5 14.167 3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="status-label">Face Authentication</div>
+                                    {% if face_ready %}
+                                    <div class="status-text success">Ready to use</div>
+                                    {% else %}
+                                    <div class="status-text warning">Not configured</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon" data-status="success">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M10 13.333v-5m0-1.666h.008M18.333 10a8.333 8.333 0 11-16.666 0 8.333 8.333 0 0116.666 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="status-label">Credential Fallback</div>
+                                    <div class="status-text success">Available</div>
+                                </div>
+                            </div>
+                            {% if token_preview %}
+                            <div class="status-item full-width">
+                                <div class="status-icon" data-status="info">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M10 5v5l3 2M18.333 10a8.333 8.333 0 11-16.666 0 8.333 8.333 0 0116.666 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="status-label">Session Token</div>
+                                    <div class="status-text mono">{{ token_preview }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="status-actions">
+                            <a href="/login" class="btn btn-secondary btn-sm">Re-authenticate</a>
+                            {% if not face_ready %}
+                            <a href="/register" class="btn btn-ghost btn-sm">Setup Face ID</a>
+                            {% endif %}
+                        </div>
+                    </article>
+
+                    <!-- Contact Card -->
+                    <article class="contact-card-modern">
+                        <div class="contact-header">
+                            <h2>Get in Touch</h2>
+                            <p>Connect with the creator</p>
+                        </div>
+                        <div class="contact-methods">
+                            <a href="mailto:dn8.porps@gmail.com" class="contact-item email">
+                                <div class="contact-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="contact-content">
+                                    <div class="contact-label">Email</div>
+                                    <div class="contact-value">dn8.porps@gmail.com</div>
+                                </div>
+                            </a>
+                            <a href="https://github.com/Nishanth1812" target="_blank" rel="noopener" class="contact-item github">
+                                <div class="contact-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="contact-content">
+                                    <div class="contact-label">GitHub</div>
+                                    <div class="contact-value">@Nishanth1812</div>
+                                </div>
+                            </a>
+                            <a href="https://www.linkedin.com/in/nishanth-devabathini-738a8a212/" target="_blank" rel="noopener" class="contact-item linkedin">
+                                <div class="contact-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="contact-content">
+                                    <div class="contact-label">LinkedIn</div>
+                                    <div class="contact-value">Nishanth Devabathini</div>
+                                </div>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© {{ config.get('APP_NAME', 'Nebula Lock') }} {{ config.get('APP_YEAR', '2025') }}. Built for delightful, dependable sign-ins.</p>
+        </footer>
+    </div>
+</body>
+</html>

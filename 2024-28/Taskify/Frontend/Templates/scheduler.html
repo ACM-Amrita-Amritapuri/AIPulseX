@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scheduler - Taskify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      :root {
+        --primary-color: #e0e6f1;
+        --primary-dark: #c7d2fe;
+        --secondary-color: #a1a1aa;
+        --success-color: #4ade80;
+        --warning-color: #fbbf24;
+        --error-color: #f87171;
+        --bg-primary: rgba(10, 10, 12, 0.4);
+        --bg-secondary: rgba(224, 230, 241, 0.05);
+        --bg-tertiary: rgba(224, 230, 241, 0.1);
+        --text-primary: #e0e6f1;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --border-color: rgba(224, 230, 241, 0.2);
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --radius: 0.5rem;
+        --transition: all 0.2s ease-in-out;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html {
+        scroll-behavior: smooth;
+        overflow-y: scroll;
+        scroll-padding-top: 100px; /* Account for sticky header */
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+        background-attachment: fixed;
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: relative;
+      }
+      
+      /* Custom page scrollbar */
+      body::-webkit-scrollbar {
+        width: 14px;
+      }
+      
+      body::-webkit-scrollbar-track {
+        background: rgba(10, 10, 12, 0.9);
+        border-left: 1px solid rgba(79, 70, 229, 0.2);
+      }
+      
+      body::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #4f46e5 0%, #6366f1 100%);
+        border-radius: 7px;
+        border: 3px solid rgba(10, 10, 12, 0.9);
+        transition: all 0.3s ease;
+      }
+      
+      body::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #6366f1 0%, #818cf8 100%);
+        border-width: 2px;
+        box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+      }
+      
+      /* Firefox scrollbar */
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #4f46e5 rgba(10, 10, 12, 0.9);
+      }
+
+      .scheduler-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        padding-bottom: 4rem;
+        min-height: calc(100vh - 4rem);
+        position: relative;
+      }
+      
+      @media (max-width: 768px) {
+        .scheduler-container {
+          padding: 1.5rem 1rem;
+          padding-bottom: 3rem;
+          min-height: calc(100vh - 3rem);
+        }
+      }
+
+      .scheduler-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(10, 10, 12, 0.6);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .scheduler-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: linear-gradient(135deg, #a5b4fc 0%, #e0e6f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      @media (max-width: 768px) {
+        .scheduler-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+          top: 0;
+        }
+        
+        .scheduler-title {
+          font-size: 1.5rem;
+        }
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      .back-link:hover {
+        color: var(--primary-dark);
+      }
+
+      .scheduler-content {
+        display: block;
+      }
+
+      .schedule-form {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+      }
+
+      .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+      }
+
+      .form-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .schedules-list {
+        background: rgba(10, 10, 12, 0.5);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .schedules-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(79, 70, 229, 0.2);
+      }
+
+      .schedules-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .schedules-title::before {
+        content: '\2261';
+        font-size: 1.5rem;
+      }
+      
+      @media (max-width: 768px) {
+        .schedules-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+      }
+
+      .schedule-item {
+        background: linear-gradient(135deg, rgba(10, 10, 12, 0.6) 0%, rgba(30, 58, 138, 0.1) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .schedule-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.1), transparent);
+        transition: left 0.5s ease;
+      }
+      
+      .schedule-item:hover::before {
+        left: 100%;
+      }
+
+      .schedule-item:hover,
+      .schedule-item.active {
+        box-shadow: 0 8px 32px rgba(79, 70, 229, 0.2);
+        transform: translateY(-2px) scale(1.01);
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, rgba(10, 10, 12, 0.7) 0%, rgba(79, 70, 229, 0.15) 100%);
+      }
+
+      .schedule-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+      }
+
+      .schedule-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .schedule-date {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .schedule-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+      
+      /* Enhanced meta badges */
+      .schedule-meta {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+        flex-wrap: wrap;
+      }
+      
+      .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: 0.375rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid var(--border-color);
+        transition: all 0.15s ease;
+      }
+      
+      .meta-badge:hover {
+        background: rgba(79, 70, 229, 0.1);
+      }
+      
+      /* Week preview section */
+      .week-preview {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+      }
+      
+      .week-preview-title {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+      
+      .week-preview-item {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.375rem;
+        padding: 0.375rem 0.625rem;
+        padding-left: 0.75rem;
+        border-left: 2px solid var(--primary-color);
+        background: var(--bg-secondary);
+        border-radius: 0 0.25rem 0.25rem 0;
+        line-height: 1.4;
+        transition: all 0.15s ease;
+      }
+      
+      .week-preview-item:hover {
+        background: rgba(79, 70, 229, 0.1);
+        padding-left: 0.875rem;
+      }
+      
+      .week-preview-more {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        padding-left: 0.75rem;
+        font-weight: 500;
+        margin-top: 0.375rem;
+      }
+
+      .schedule-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.625rem 1.25rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: rgba(10, 10, 12, 0.6);
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .action-btn:hover {
+        background: rgba(79, 70, 229, 0.15);
+        color: var(--text-primary);
+        border-color: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+      }
+
+      .action-btn.primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      }
+
+      .action-btn.primary:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+      }
+
+      .action-btn.danger {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+      }
+
+      .action-btn.danger:hover {
+        background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      
+      .empty-state p {
+        margin: 0.5rem 0;
+      }
+      
+      .empty-state p:first-of-type {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+      
+      /* Loading spinner */
+      .loading-spinner {
+        text-align: center;
+        padding: 3rem 2rem;
+      }
+      
+      .spinner {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 1rem;
+        border: 4px solid rgba(79, 70, 229, 0.2);
+        border-top-color: #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .task-list {
+        margin-top: 1rem;
+      }
+      /* Details panel */
+      .schedule-details {
+        margin-top: 2rem;
+        background: linear-gradient(135deg, rgba(10, 10, 12, 0.7) 0%, rgba(30, 58, 138, 0.15) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        animation: slideIn 0.3s ease-out;
+        overflow: hidden;
+      }
+      
+      .details-description-wrapper {
+        padding: 1.5rem;
+        background: rgba(10, 10, 12, 0.3);
+      }
+      
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 1.25rem;
+        margin-bottom: 0;
+        border-bottom: 2px solid rgba(79, 70, 229, 0.3);
+        background: linear-gradient(135deg, rgba(10, 10, 12, 0.95) 0%, rgba(30, 58, 138, 0.2) 100%);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-radius: var(--radius) var(--radius) 0 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+      }
+      
+      .details-header::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #4f46e5, transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .schedule-details.scrolled .details-header::after {
+        opacity: 1;
+      }
+
+      .details-title { 
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+      }
+      
+      .details-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+      
+      /* Scrollable table container */
+      .table-scroll-container {
+        max-height: 70vh;
+        overflow-y: auto;
+        overflow-x: auto;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        position: relative;
+      }
+      
+      /* Scroll indicator */
+      .table-scroll-container::before {
+        content: '⬇ Scroll to view more ⬇';
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(79, 70, 229, 0) 100%);
+        color: white;
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 5;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      
+      .table-scroll-container.has-scroll::before {
+        opacity: 1;
+      }
+      
+      /* Custom scrollbar styling */
+      .table-scroll-container::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      
+      .table-scroll-container::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 5px;
+      }
+      
+      .table-scroll-container::-webkit-scrollbar-thumb {
+        background: #4f46e5;
+        border-radius: 5px;
+        transition: background 0.2s ease;
+      }
+      
+      .table-scroll-container::-webkit-scrollbar-thumb:hover {
+        background: #6366f1;
+      }
+
+      .details-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        background: var(--bg-primary);
+      }
+      .details-table th,
+      .details-table td {
+        border-bottom: 1px solid var(--border-color);
+        padding: .8rem .75rem;
+        text-align: left;
+      }
+      .details-table th { 
+        color: var(--text-primary); 
+        font-weight: 600;
+        background: rgba(10, 10, 12, 0.8);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+      }
+      .details-table tr:last-child td { border-bottom: none; }
+      
+      /* Week-wise schedule styling */
+      .week-header-row {
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+        color: #ffffff !important;
+        font-weight: 600;
+      }
+      
+      .week-header-row td {
+        padding: 1rem 0.875rem !important;
+        border-top: 2px solid #4f46e5;
+        border-bottom: 1px solid rgba(255,255,255,0.2) !important;
+      }
+      
+      .week-title {
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+      
+      .week-goal {
+        font-size: 0.85rem;
+        font-weight: 400;
+        opacity: 0.95;
+        margin-top: 0.25rem;
+      }
+      
+      .week-topics {
+        font-size: 0.8rem;
+        font-weight: 400;
+        margin-top: 0.375rem;
+        padding-top: 0.375rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        line-height: 1.5;
+      }
+      
+      .day-row {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+      }
+      
+      .day-row:hover {
+        background: rgba(79, 70, 229, 0.08);
+        transform: translateX(4px);
+        border-left-color: #4f46e5;
+      }
+      
+      .day-name {
+        font-weight: 600;
+        color: #a5b4fc;
+        padding-left: 1.5rem !important;
+        font-size: 0.95rem;
+      }
+      
+      .topic-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      
+      .session-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.88rem;
+      }
+      
+      .theory-session {
+        color: var(--text-primary);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 0.8rem;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 0.25rem;
+        border-left: 3px solid #3b82f6;
+        line-height: 1.5;
+      }
+      
+      .practice-session {
+        color: var(--text-primary);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 0.8rem;
+        background: rgba(34, 197, 94, 0.1);
+        border-radius: 0.25rem;
+        border-left: 3px solid #22c55e;
+        line-height: 1.5;
+      }
+      
+      .summary-row {
+        background: rgba(79, 70, 229, 0.15) !important;
+        font-weight: 600;
+        border-top: 3px solid #4f46e5 !important;
+      }
+      
+      .summary-row td {
+        padding: 1.25rem 1rem !important;
+        color: var(--text-primary);
+      }
+      
+      .summary-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      
+      .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(10, 10, 12, 0.6);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+      
+      /* Spacing row between weeks */
+      .spacing-row {
+        height: 2rem;
+        background: transparent;
+      }
+      
+      .spacing-row td {
+        padding: 0 !important;
+        border: none !important;
+      }
+      
+      /* Scroll to top button */
+      .scroll-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px) scale(0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Scroll progress ring */
+      .scroll-to-top::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: #a5b4fc;
+        transition: transform 0.3s ease;
+      }
+      
+      .scroll-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+      }
+      
+      .scroll-to-top:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+        transform: translateY(-6px) scale(1.1);
+        box-shadow: 0 8px 28px rgba(79, 70, 229, 0.6);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+      
+      .scroll-to-top:hover::before {
+        transform: rotate(180deg);
+      }
+      
+      .scroll-to-top:active {
+        transform: translateY(-4px) scale(1.05);
+      }
+      
+      @media (max-width: 768px) {
+        .scroll-to-top {
+          bottom: 1.5rem;
+          right: 1.5rem;
+          width: 50px;
+          height: 50px;
+          font-size: 1.25rem;
+        }
+      }
+
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-info {
+        flex: 1;
+      }
+
+      .task-title {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+      }
+
+      .task-time {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .task-priority {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .priority-high {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .priority-medium {
+        background: #fffbeb;
+        color: #d97706;
+      }
+
+      .priority-low {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+
+      @media (max-width: 768px) {
+        .scheduler-container {
+          padding: 1rem;
+        }
+        
+        .schedule-title {
+          font-size: 1.1rem;
+        }
+        
+        .schedule-actions {
+          flex-direction: column;
+        }
+        
+        .action-btn {
+          width: 100%;
+          text-align: center;
+        }
+        
+        .schedule-meta {
+          gap: 0.5rem;
+        }
+        
+        .meta-badge {
+          font-size: 0.8rem;
+          padding: 0.35rem 0.7rem;
+        }
+        
+        .details-table {
+          font-size: 0.85rem;
+        }
+        
+        .details-table th,
+        .details-table td {
+          padding: 0.6rem 0.4rem;
+        }
+        
+        .week-title {
+          font-size: 1rem;
+        }
+        
+        .session-details {
+          font-size: 0.8rem;
+        }
+        
+        .theory-session,
+        .practice-session {
+          padding: 0.3rem 0.5rem;
+        }
+        
+        .day-name {
+          font-size: 0.85rem;
+        }
+        
+        /* Stack table cells on very small screens */
+        @media (max-width: 480px) {
+          .details-table thead {
+            display: none;
+          }
+          
+          .details-table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+          }
+          
+          .details-table td {
+            display: block;
+            text-align: left;
+            padding: 0.5rem 0;
+            border-bottom: none;
+          }
+          
+          .details-table td:before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.25rem;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scheduler-container">
+      <div class="scheduler-header">
+        <h1 class="scheduler-title">Scheduler</h1>
+        <a href="{{ url_for('dashboard') }}" class="back-link">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <div class="scheduler-content">
+        <!-- Schedules List Only -->
+        <div class="schedules-list">
+          <div class="schedules-header">
+            <h3 class="schedules-title">Your Schedules</h3>
+            <button class="action-btn" onclick="refreshSchedules()">
+              Refresh
+            </button>
+          </div>
+
+          <div id="schedulesContainer">
+            <div class="empty-state">
+              <div class="empty-state-icon" style="font-size: 4rem;">◕</div>
+              <p>No schedules created yet</p>
+              <p>Create a schedule using the dashboard chat, then refresh.</p>
+            </div>
+          </div>
+
+          <div id="scheduleDetails" class="schedule-details" style="display:none;">
+            <div class="details-header">
+              <div class="details-title">Selected Schedule</div>
+              <div class="details-meta" id="detailsMeta"></div>
+            </div>
+            <div class="details-description-wrapper">
+              <div id="detailsDescription" class="schedule-description"></div>
+            </div>
+            <div class="table-scroll-container">
+              <table class="details-table" id="detailsTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Task</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Duration</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scroll to top button -->
+    <button class="scroll-to-top" id="scrollToTopBtn" onclick="scrollToTop()" title="Back to top">
+      ↑
+    </button>
+
+    <script>
+      // Load schedules on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadSchedules();
+        initScrollToTop();
+      });
+      
+      // Scroll to top functionality
+      function initScrollToTop() {
+        const scrollBtn = document.getElementById('scrollToTopBtn');
+        let scrollTimeout;
+        
+        window.addEventListener('scroll', function() {
+          // Show/hide button based on scroll position
+          if (window.pageYOffset > 300) {
+            scrollBtn.classList.add('visible');
+          } else {
+            scrollBtn.classList.remove('visible');
+          }
+          
+          // Add pulse effect on scroll
+          clearTimeout(scrollTimeout);
+          scrollBtn.style.transform = scrollBtn.classList.contains('visible') 
+            ? 'translateY(0) scale(1.05)' 
+            : 'translateY(20px) scale(0.8)';
+          
+          scrollTimeout = setTimeout(() => {
+            if (scrollBtn.classList.contains('visible')) {
+              scrollBtn.style.transform = 'translateY(0) scale(1)';
+            }
+          }, 150);
+        }, { passive: true });
+      }
+      
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        
+        // Add click animation
+        const scrollBtn = document.getElementById('scrollToTopBtn');
+        scrollBtn.style.transform = 'translateY(0) scale(0.9)';
+        setTimeout(() => {
+          scrollBtn.style.transform = 'translateY(0) scale(1)';
+        }, 100);
+      }
+
+      async function loadSchedules() {
+        const container = document.getElementById("schedulesContainer");
+        
+        // Show loading state
+        container.innerHTML = `
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading schedules...</div>
+          </div>
+        `;
+        
+        try {
+          const response = await fetch("/scheduler/api/schedules");
+          const schedules = await response.json();
+
+          if (schedules.length === 0) {
+            container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">◧</div>
+                            <p>No schedules created yet</p>
+                            <p>Create your first schedule using the chat</p>
+                        </div>
+                    `;
+          } else {
+            container.innerHTML = schedules
+              .map((schedule) => createScheduleHTML(schedule))
+              .join("");
+
+            // Add stagger animation to schedule items
+            const scheduleItems = container.querySelectorAll('.schedule-item');
+            scheduleItems.forEach((el, index) => {
+              el.style.opacity = '0';
+              el.style.transform = 'translateY(20px)';
+              setTimeout(() => {
+                el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+              }, index * 100);
+              
+              // Attach click handlers for interactive selection
+              el.addEventListener('click', () => {
+                const id = el.getAttribute('data-id');
+                document.querySelectorAll('.schedule-item').forEach(i=>i.classList.remove('active'));
+                el.classList.add('active');
+                viewSchedule(id);
+                
+                // Smooth scroll to details
+                setTimeout(() => {
+                  document.getElementById('scheduleDetails')?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }, 100);
+              });
+            });
+          }
+        } catch (error) {
+          console.error("Error loading schedules:", error);
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon" style="font-size: 4rem;">!</div>
+              <p>Failed to load schedules</p>
+              <p>Please check your connection and try again</p>
+              <button class="action-btn primary" onclick="loadSchedules()" style="margin-top: 1rem;">
+                <span style="display: inline-block; animation: spin 2s linear infinite;">↻</span> Retry
+              </button>
+            </div>
+          `;
+        }
+      }
+
+    function createScheduleHTML(schedule) {
+        const tasks = schedule.tasks || [];
+        const weeks = schedule.weeks || [];
+        const createdDate = new Date(schedule.created_at).toLocaleDateString();
+
+        // Check if it's week-wise schedule
+        const isWeekWise = weeks.length > 0;
+        let contentHTML = '';
+        
+        if (isWeekWise) {
+          const totalWeeks = schedule.total_weeks || weeks.length;
+          const durationPerDay = schedule.duration_per_day || 60;
+          contentHTML = `
+            <div class="schedule-meta">
+              <span class="meta-badge">
+                ◕ <strong>${totalWeeks}</strong> Week${totalWeeks > 1 ? 's' : ''}
+              </span>
+              <span class="meta-badge">
+                ⏱ <strong>${durationPerDay}</strong> min/day
+              </span>
+              <span class="meta-badge">
+                ▦ <strong>${schedule.productivity_score || 0}</strong>/100
+              </span>
+              <span class="meta-badge">
+                • <strong>${Math.floor((schedule.total_duration || 0) / 60)}</strong> hrs total
+              </span>
+            </div>
+            <div class="week-preview">
+              <div class="week-preview-title">
+                <span>≡</span>
+                <span>Weekly Breakdown:</span>
+              </div>
+              ${weeks.slice(0, 4).map((week) => `
+                <div class="week-preview-item">
+                  <strong>Week ${week.week_number}:</strong> ${week.week_title}
+                  ${week.daily_sessions ? ` <span style="color: var(--text-muted);">(${week.daily_sessions.length} days)</span>` : ''}
+                </div>
+              `).join('')}
+              ${weeks.length > 4 ? `<div class="week-preview-more">+ ${weeks.length - 4} more weeks...</div>` : ''}
+            </div>
+          `;
+        } else if (tasks.length > 0) {
+          contentHTML = `
+            <div class="task-list">
+                ${tasks.slice(0, 3).map((task) => `
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-time">${task.start_time} - ${task.end_time} (${task.duration} min)</div>
+                        </div>
+                        <span class="task-priority priority-${task.priority}">${task.priority}</span>
+                    </div>
+                `).join("")}
+                ${tasks.length > 3 ? `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">+ ${tasks.length - 3} more tasks</div>` : ''}
+            </div>
+          `;
+        }
+
+        return `
+        <div class="schedule-item" data-id="${schedule.id}">
+                    <div class="schedule-header">
+                        <div style="flex: 1;">
+                            <div class="schedule-title">${schedule.title}</div>
+                            <div class="schedule-date">◕ Created: ${createdDate}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-description">${schedule.description}</div>
+                    
+                    ${contentHTML}
+                    
+                    <div class="schedule-actions" style="margin-top: 1.5rem;">
+                        <button class="action-btn primary" onclick="viewSchedule('${schedule.id}')">
+                          <span>◉</span> View Full Schedule
+                        </button>
+                        <button class="action-btn" onclick="exportSchedule('${schedule.id}')">
+                          <span>▤</span> Export PDF
+                        </button>
+                        <button class="action-btn danger" onclick="deleteSchedule('${schedule.id}')">
+                          <span>×</span> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+      }
+
+      function clearForm() {}
+
+      function refreshSchedules() {
+        loadSchedules();
+      }
+
+      async function viewSchedule(scheduleId) {
+        try {
+          const res = await fetch(`/scheduler/api/schedules/${scheduleId}`);
+          if (!res.ok) return;
+          const schedule = await res.json();
+          renderScheduleDetails(schedule);
+        } catch (e) {
+          console.error('Failed to load schedule', e);
+        }
+      }
+
+      function renderScheduleDetails(schedule) {
+        const panel = document.getElementById('scheduleDetails');
+        const meta = document.getElementById('detailsMeta');
+        const desc = document.getElementById('detailsDescription');
+        const tbody = document.querySelector('#detailsTable tbody');
+
+        const created = schedule.created_at ? new Date(schedule.created_at).toLocaleString() : '';
+        meta.textContent = `${schedule.title} • ${created}`;
+        desc.textContent = schedule.description || '';
+
+        // Check if this is a week-wise schedule or old-style task list
+        if (schedule.weeks && Array.isArray(schedule.weeks)) {
+          // New week-wise format
+          tbody.innerHTML = '';
+          
+          schedule.weeks.forEach((week, weekIdx) => {
+            // Week header row
+            const weekHeader = document.createElement('tr');
+            weekHeader.className = 'week-header-row';
+            weekHeader.innerHTML = `
+              <td colspan="6">
+                <div class="week-title">
+                  ◕ Week ${week.week_number}: ${week.week_title}
+                </div>
+                <div class="week-goal">
+                  ◈ Goal: ${week.week_goal || 'Master the topics covered this week'}
+                </div>
+                <div class="week-topics">
+                  ▤ Topics: ${week.topics && Array.isArray(week.topics) ? week.topics.join(' • ') : 'Various topics'}
+                </div>
+              </td>
+            `;
+            tbody.appendChild(weekHeader);
+            
+            // Daily sessions for this week
+            if (week.daily_sessions && Array.isArray(week.daily_sessions)) {
+              week.daily_sessions.forEach((session, dayIdx) => {
+                const row = document.createElement('tr');
+                row.className = 'day-row';
+                row.innerHTML = `
+                  <td class="day-name" data-label="Day">${session.day || 'Day ' + (dayIdx + 1)}</td>
+                  <td data-label="Topic">
+                    <div class="topic-name">${session.topic || 'Study Session'}</div>
+                  </td>
+                  <td colspan="3" data-label="Session Details">
+                    <div class="session-details">
+                      <div class="theory-session">
+                        <span>▤</span>
+                        <span>${session.theory || 'Theory session'}</span>
+                      </div>
+                      <div class="practice-session">
+                        <span>◈</span>
+                        <span>${session.practice || 'Practice session'}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Duration">
+                    <strong>${session.duration || 0} min</strong>
+                  </td>
+                `;
+                tbody.appendChild(row);
+              });
+            }
+            
+            // Add spacing row between weeks (except after last week)
+            if (weekIdx < schedule.weeks.length - 1) {
+              const spacer = document.createElement('tr');
+              spacer.className = 'spacing-row';
+              spacer.innerHTML = '<td colspan="6" style="height: 1.5rem; background: transparent; border: none; padding: 0;"></td>';
+              tbody.appendChild(spacer);
+            }
+          });
+          
+          // Add summary row
+          const summaryRow = document.createElement('tr');
+          summaryRow.className = 'summary-row';
+          summaryRow.innerHTML = `
+            <td colspan="6">
+              <div class="summary-stats">
+                <div class="stat-badge">
+                  <span>▦</span>
+                  <span><strong>${schedule.total_weeks || schedule.weeks.length}</strong> Total Weeks</span>
+                </div>
+                <div class="stat-badge">
+                  <span>⏱</span>
+                  <span><strong>${schedule.duration_per_day || 0}</strong> min/day</span>
+                </div>
+                <div class="stat-badge">
+                  <span>•</span>
+                  <span><strong>${schedule.total_duration || 0}</strong> total minutes</span>
+                </div>
+                <div class="stat-badge">
+                  <span>★</span>
+                  <span>Score: <strong>${schedule.productivity_score || 0}/100</strong></span>
+                </div>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(summaryRow);
+          
+        } else {
+          // Old format with tasks array
+          const tasks = Array.isArray(schedule.tasks) ? schedule.tasks : [];
+          tbody.innerHTML = tasks.map((t, idx) => `
+            <tr>
+              <td data-label="#">${idx + 1}</td>
+              <td data-label="Task">${t.title || ''}</td>
+              <td data-label="Start">${t.start_time || ''}</td>
+              <td data-label="End">${t.end_time || ''}</td>
+              <td data-label="Duration">${t.duration ? t.duration + ' min' : ''}</td>
+              <td data-label="Priority"><span class="task-priority priority-${t.priority}">${t.priority}</span></td>
+            </tr>
+          `).join('');
+        }
+
+        panel.style.display = '';
+        
+        // Add scroll detection for sticky header effect
+        setTimeout(() => {
+          const scrollContainer = document.querySelector('.table-scroll-container');
+          const detailsPanel = document.getElementById('scheduleDetails');
+          
+          if (scrollContainer) {
+            const isScrollable = scrollContainer.scrollHeight > scrollContainer.clientHeight;
+            if (isScrollable) {
+              scrollContainer.classList.add('has-scroll');
+              
+              // Add scroll event listener for sticky header effect
+              scrollContainer.addEventListener('scroll', function() {
+                if (this.scrollTop > 50) {
+                  this.classList.remove('has-scroll');
+                  detailsPanel.classList.add('scrolled');
+                } else {
+                  detailsPanel.classList.remove('scrolled');
+                }
+              });
+            }
+          }
+        }, 100);
+      }
+
+      async function exportSchedule(scheduleId) {
+        try {
+          const response = await fetch(
+            `/scheduler/api/schedules/${scheduleId}/export/pdf`
+          );
+          if (response.ok) {
+            alert("PDF export functionality coming soon!");
+          } else {
+            const error = await response.json();
+            alert("Error: " + error.error);
+          }
+        } catch (error) {
+          console.error("Error exporting schedule:", error);
+          alert("Error exporting schedule. Please try again.");
+        }
+      }
+
+      async function deleteSchedule(scheduleId) {
+        if (confirm("Are you sure you want to delete this schedule?")) {
+          try {
+            const response = await fetch(
+              `/scheduler/api/schedules/${scheduleId}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (response.ok) {
+              // Clear the details panel if this schedule is currently displayed
+              const detailsPanel = document.getElementById('scheduleDetails');
+              if (detailsPanel && detailsPanel.style.display !== 'none') {
+                detailsPanel.style.display = 'none';
+              }
+              
+              loadSchedules();
+              alert("Schedule deleted successfully!");
+            } else {
+              const error = await response.json();
+              alert("Error: " + error.error);
+            }
+          } catch (error) {
+            console.error("Error deleting schedule:", error);
+            alert("Error deleting schedule. Please try again.");
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

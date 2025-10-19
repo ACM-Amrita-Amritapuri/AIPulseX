@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Documents - Taskify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+            color: #e0e6f1;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated particles background */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(224, 230, 241, 0.6);
+            border-radius: 50%;
+            animation: particle-float 8s ease-in-out infinite;
+        }
+
+        .particle.p1 { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle.p2 { top: 40%; left: 20%; animation-delay: 1s; }
+        .particle.p3 { top: 60%; left: 30%; animation-delay: 2s; }
+        .particle.p4 { top: 80%; left: 40%; animation-delay: 3s; }
+        .particle.p5 { top: 30%; left: 60%; animation-delay: 4s; }
+        .particle.p6 { top: 50%; left: 70%; animation-delay: 5s; }
+        .particle.p7 { top: 70%; left: 80%; animation-delay: 6s; }
+        .particle.p8 { top: 10%; left: 90%; animation-delay: 7s; }
+
+        @keyframes particle-float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+
+        /* Icon System */
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem;
+            height: 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .icon-lg {
+            width: 1.5rem;
+            height: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .icon-xl {
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.25rem;
+        }
+
+        .icon-doc::before { content: '◰'; font-weight: 700; }
+        .icon-pdf::before { 
+          content: '◰'; 
+          color: #ef4444; 
+          font-weight: 700;
+          filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.3));
+        }
+        .icon-docx::before { 
+          content: '◰'; 
+          color: #3b82f6; 
+          font-weight: 700;
+          filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+        }
+        .icon-empty::before { content: '◯'; }
+        .icon-idea::before { content: '◉'; }
+        .icon-back::before { content: '←'; }
+        .icon-chart::before { content: '◧'; }
+        .icon-search::before { content: '⌕'; }
+        .icon-calendar::before { content: '◷'; }
+        .icon-sort::before { content: '≡'; }
+        .icon-list::before { content: '☰'; }
+        .icon-clock::before { content: '◷'; }
+        .icon-upload::before { content: '↑'; }
+
+        .page-container {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1.25rem 1.75rem;
+            background: rgba(10, 10, 12, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.75rem;
+            color: #e0e6f1;
+            font-weight: 600;
+        }
+
+        .header-icon {
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            border-radius: 8px;
+            font-size: 1.25rem;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #e0e6f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: rgba(79, 70, 229, 0.15);
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            background: rgba(79, 70, 229, 0.25);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #818cf8);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.2);
+            border-color: rgba(129, 140, 248, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .stat-label {
+            margin-top: 0.5rem;
+            color: rgba(224, 230, 241, 0.7);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin: 1rem 0 1.5rem;
+            background: rgba(10, 10, 12, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e0e6f1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            border-color: rgba(129, 140, 248, 0.4);
+            background: rgba(15, 23, 42, 0.7);
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: rgba(224, 230, 241, 0.4);
+        }
+
+        .sort-select {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e0e6f1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .sort-select:hover {
+            border-color: rgba(129, 140, 248, 0.3);
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        .sort-select:focus {
+            border-color: rgba(129, 140, 248, 0.4);
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .document-card {
+            position: relative;
+            background: rgba(10, 10, 12, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .document-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #818cf8);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .document-card:hover::before {
+            opacity: 1;
+        }
+
+        .document-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.2);
+            border-color: rgba(129, 140, 248, 0.4);
+            background: rgba(10, 10, 12, 0.7);
+        }
+
+        .doc-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 2px 6px rgba(129, 140, 248, 0.25));
+            transition: transform 0.2s ease;
+        }
+
+        .document-card:hover .doc-icon {
+            transform: scale(1.05);
+        }
+
+        .doc-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.625rem;
+            color: #e0e6f1;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .doc-info {
+            font-size: 0.8rem;
+            color: rgba(224, 230, 241, 0.6);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .doc-type-badge {
+            display: inline-block;
+            padding: 0.35rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.625rem;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .doc-type-pdf {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .doc-type-docx {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+            color: #93c5fd;
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            border: 2px dashed rgba(129, 140, 248, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 12px rgba(129, 140, 248, 0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e0e6f1;
+        }
+
+        .empty-state p {
+            color: rgba(224, 230, 241, 0.7);
+            margin: 0.75rem 0;
+            font-size: 1rem;
+        }
+
+        .upload-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+            border: 1px solid rgba(129, 140, 248, 0.4);
+            border-radius: 10px;
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particle-container">
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+        <div class="particle p4"></div>
+        <div class="particle p5"></div>
+        <div class="particle p6"></div>
+        <div class="particle p7"></div>
+        <div class="particle p8"></div>
+    </div>
+
+    <div class="page-container">
+        <div class="container">
+            <div class="header">
+                <h1><span class="header-icon"><span class="icon icon-xl icon-doc"></span></span> My Documents</h1>
+                <a href="/dashboard" class="back-link">
+                    <span class="icon icon-back"></span> <span class="icon icon-chart"></span> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDocs">{{ documents|length }}</div>
+                    <div class="stat-label">Total Documents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pdfCount">0</div>
+                    <div class="stat-label">PDF Files</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="docxCount">0</div>
+                    <div class="stat-label">Word Documents</div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search documents by name or type..." />
+                <select id="sortSelect" class="sort-select">
+                    <option value="recent">Most Recent</option>
+                    <option value="name">Name (A→Z)</option>
+                    <option value="type">File Type</option>
+                </select>
+            </div>
+
+            {% if documents %}
+            <div class="documents-grid">
+                {% for doc in documents %}
+                <div class="document-card" data-name="{{ doc.filename|lower }}" data-type="{{ doc.doc_type|lower }}" data-time="{{ doc.upload_time }}">
+                    <div class="doc-icon">
+                        <span class="icon icon-xl {% if doc.doc_type == 'pdf' %}icon-pdf{% else %}icon-docx{% endif %}"></span>
+                    </div>
+                    <div class="doc-name">{{ doc.filename }}</div>
+                    <div class="doc-info">
+                        <span class="icon icon-clock"></span>
+                        <span>Uploaded: <span class="upload-date">{{ doc.upload_time }}</span></span>
+                    </div>
+                    <span class="doc-type-badge doc-type-{{ doc.doc_type }}">
+                        {{ doc.doc_type|upper }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon"><span class="icon" style="font-size: 4rem;">□</span></div>
+                <h3>No Documents Yet</h3>
+                <p>Your uploaded documents will appear here</p>
+                <div class="upload-hint">
+                    <span class="icon icon-lg icon-idea"></span>
+                    <span>Go to Dashboard → Click <span class="icon icon-upload"></span> Upload Docs</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Format dates, enable search/sort, and count file types
+        (function(){
+            const cards = Array.from(document.querySelectorAll('.document-card'));
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+
+            // Count file types
+            let pdfCount = 0;
+            let docxCount = 0;
+            cards.forEach(card => {
+                const type = card.dataset.type || '';
+                if (type === 'pdf') pdfCount++;
+                if (type === 'docx' || type === 'doc') docxCount++;
+            });
+            
+            document.getElementById('pdfCount').textContent = pdfCount;
+            document.getElementById('docxCount').textContent = docxCount;
+
+            // Date formatting
+            document.querySelectorAll('.upload-date').forEach(el => {
+                const iso = el.textContent && el.textContent.trim();
+                if (!iso) return;
+                try {
+                    const d = new Date(iso);
+                    if (!isNaN(d)) {
+                        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                        el.textContent = d.toLocaleDateString('en-US', options);
+                    }
+                } catch {}
+            });
+
+            // Filtering
+            function applyFilter(){
+                const q = (searchInput?.value || '').toLowerCase();
+                let visibleCount = 0;
+                cards.forEach(card => {
+                    const name = card.dataset.name || '';
+                    const type = card.dataset.type || '';
+                    const isVisible = name.includes(q) || type.includes(q);
+                    card.style.display = isVisible ? '' : 'none';
+                    if (isVisible) visibleCount++;
+                });
+            }
+            searchInput?.addEventListener('input', applyFilter);
+
+            // Sorting
+            function applySort(){
+                const value = sortSelect?.value || 'recent';
+                const grid = document.querySelector('.documents-grid');
+                if (!grid) return;
+                
+                const sorted = [...cards].sort((a,b)=>{
+                    if (value === 'name') {
+                        return (a.dataset.name||'').localeCompare(b.dataset.name||'');
+                    }
+                    if (value === 'type') {
+                        return (a.dataset.type||'').localeCompare(b.dataset.type||'');
+                    }
+                    // recent by upload time
+                    return (b.dataset.time||'').localeCompare(a.dataset.time||'');
+                });
+                sorted.forEach(el=>grid.appendChild(el));
+            }
+            sortSelect?.addEventListener('change', applySort);
+
+            // Initial apply
+            applySort();
+        })();
+    </script>
+</body>
+</html>

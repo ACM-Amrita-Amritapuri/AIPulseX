@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Lock · Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script defer src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</head>
+<body data-page="login">
+    <noscript>
+        <div class="noscript-banner">This experience requires JavaScript and camera access. Please enable both to continue.</div>
+    </noscript>
+    <div class="app-shell">
+        <header class="top-nav">
+            <div class="brand">Nebula Lock</div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-links" aria-label="Primary">
+                <a href="/" class="nav-link" data-route="home">Home</a>
+            </nav>
+        </header>
+
+        <main class="page-main">
+            <section class="panel-panel" data-animate>
+                <div class="panel-heading">
+                    <h1>Slide back in with confidence</h1>
+                    <p>Nebula Lock softly powers your camera for biometric checks, then eases back once your session is secure.</p>
+                </div>
+                <div class="panel-content grid-two">
+                    <div class="card">
+                        <h2>Face authentication</h2>
+                        <p class="section-subtitle">We guide you with three progressive attempts before recommending a credential fallback.</p>
+                        <div class="attempt-info">
+                            <span class="status-chip" id="loginAttemptStatus">Initializing camera...</span>
+                            <div class="button-cluster">
+                                <button type="button" class="btn btn-secondary" id="loginRestart">Restart camera</button>
+                                <button type="button" class="btn btn-secondary" id="loginStop">Stop camera</button>
+                            </div>
+                        </div>
+                        <div class="video-wrapper small">
+                            <video id="loginVideo" playsinline muted></video>
+                            <canvas id="loginCanvas" aria-hidden="true"></canvas>
+                            <div class="video-overlay">
+                                <p id="loginInstruction">Preparing live preview...</p>
+                                <span class="badge" id="loginStatus">Camera warming up</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginUsername">Username</label>
+                            <input type="text" id="loginUsername" name="username" placeholder="Your registered username" required>
+                        </div>
+                        <button class="btn btn-primary full" id="loginWithFace">Authenticate with face</button>
+                        <p class="helper-text">We recommend facing the camera directly with even lighting for best results.</p>
+                    </div>
+
+                    <form id="fallbackForm" class="card" autocomplete="off">
+                        <h2>Fallback credentials</h2>
+                        <p class="section-subtitle">If biometric login fails, continue with your username and password.</p>
+                        <div class="form-group">
+                            <label for="fallbackUsername">Username</label>
+                            <input type="text" id="fallbackUsername" name="username" placeholder="Registered username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fallbackPassword">Password</label>
+                            <input type="password" id="fallbackPassword" name="password" placeholder="Account password" required>
+                        </div>
+                        <button type="submit" class="btn btn-accent full">Login with credentials</button>
+                        <p class="helper-text">New here? <a href="/register">Create your account</a>.</p>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© {{ config.get('APP_NAME', 'Nebula Lock') }} {{ config.get('APP_YEAR', '2025') }}. Built for delightful, dependable sign-ins.</p>
+        </footer>
+    </div>
+
+    <div class="modal-layer" data-modal-layer hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-live="assertive">
+            <div class="modal-header">
+                <h3 id="modalTitle">Status</h3>
+                <button class="modal-close" data-modal-close aria-label="Close status dialog">×</button>
+            </div>
+            <p id="modalMessage">...</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" data-modal-close>Close</button>
+                <button class="btn btn-primary" id="modalPrimaryAction" hidden>Continue</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

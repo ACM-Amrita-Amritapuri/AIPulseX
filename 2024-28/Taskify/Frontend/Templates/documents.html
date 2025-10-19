@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documents - Taskify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      :root {
+        --primary-color: #e0e6f1;
+        --primary-dark: #c7d2fe;
+        --secondary-color: #a1a1aa;
+        --success-color: #4ade80;
+        --warning-color: #fbbf24;
+        --error-color: #f87171;
+        --bg-primary: rgba(10, 10, 12, 0.4);
+        --bg-secondary: rgba(224, 230, 241, 0.05);
+        --bg-tertiary: rgba(224, 230, 241, 0.1);
+        --text-primary: #e0e6f1;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --border-color: rgba(224, 230, 241, 0.2);
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --radius: 0.5rem;
+        --transition: all 0.2s ease-in-out;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #0a0a0c 100%);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .documents-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .documents-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .documents-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      .back-link:hover {
+        color: var(--primary-dark);
+      }
+
+      .upload-section {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+      }
+
+      .upload-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .upload-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .upload-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .upload-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .documents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .document-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+      }
+
+      .document-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .document-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .document-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .pdf-icon {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .docx-icon {
+        background: #eff6ff;
+        color: #2563eb;
+      }
+
+      .document-info {
+        flex: 1;
+      }
+
+      .document-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        word-break: break-word;
+      }
+
+      .document-type {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .document-meta {
+        margin-bottom: 1rem;
+      }
+
+      .document-meta-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .document-meta-label {
+        color: var(--text-muted);
+      }
+
+      .document-meta-value {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .document-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        cursor: pointer;
+        flex: 1;
+        text-align: center;
+      }
+
+      .action-btn:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .action-btn.primary {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .action-btn.primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .action-btn.danger {
+        background: var(--error-color);
+        color: white;
+        border-color: var(--error-color);
+      }
+
+      .action-btn.danger:hover {
+        background: #dc2626;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .search-bar {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+      }
+
+      .search-bar:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+      }
+
+      @media (max-width: 768px) {
+        .documents-container {
+          padding: 1rem;
+        }
+
+        .documents-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="documents-container">
+      <div class="documents-header">
+        <h1 class="documents-title">Documents</h1>
+        <a href="{{ url_for('dashboard') }}" class="back-link">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-section">
+        <div class="upload-header">
+          <h3 class="upload-title">Upload New Document</h3>
+          <div class="upload-button-container">
+            <input type="file" id="fileInput" accept=".pdf,.docx" multiple style="display: none;">
+            <button type="button" id="chooseFilesBtn" class="upload-button">
+              📁 Choose Files
+            </button>
+          </div>
+        </div>
+        <p style="color: var(--text-secondary); margin: 0">
+          Upload PDF or DOCX documents to process and store in the knowledge
+          base. Documents will be automatically processed and made searchable.
+        </p>
+        <div id="uploadStatus" style="margin-top: 1rem; display: none;"></div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="totalDocuments">0</div>
+          <div class="stat-label">Total Documents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalPages">0</div>
+          <div class="stat-label">Total Pages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalChunks">0</div>
+          <div class="stat-label">Processed Chunks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="lastUpload">-</div>
+          <div class="stat-label">Last Upload</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <input
+        type="text"
+        class="search-bar"
+        id="searchInput"
+        placeholder="Search documents..."
+      />
+
+      <!-- Documents Grid -->
+      <div class="documents-grid" id="documentsGrid">
+        <div class="empty-state">
+          <div class="empty-state-icon">📄</div>
+          <p>No documents uploaded yet</p>
+          <p>Upload your first document to get started</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Mock data for demonstration
+      const mockDocuments = [
+        {
+          id: "1",
+          name: "Project Requirements.pdf",
+          type: "pdf",
+          size: "2.4 MB",
+          pages: 15,
+          chunks: 45,
+          uploadDate: "2024-01-15",
+          status: "processed",
+        },
+        {
+          id: "2",
+          name: "Meeting Notes.docx",
+          type: "docx",
+          size: "1.2 MB",
+          pages: 8,
+          chunks: 24,
+          uploadDate: "2024-01-14",
+          status: "processed",
+        },
+        {
+          id: "3",
+          name: "Technical Specification.pdf",
+          type: "pdf",
+          size: "5.8 MB",
+          pages: 32,
+          chunks: 96,
+          uploadDate: "2024-01-13",
+          status: "processing",
+        },
+      ];
+
+      // Load documents on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadDocuments();
+        updateStats();
+      });
+
+      // Search functionality
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", function (e) {
+          const query = e.target.value.toLowerCase();
+          filterDocuments(query);
+        });
+
+      function loadDocuments() {
+        const container = document.getElementById("documentsGrid");
+
+        if (mockDocuments.length === 0) {
+          container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <p>No documents uploaded yet</p>
+                        <p>Upload your first document to get started</p>
+                    </div>
+                `;
+        } else {
+          container.innerHTML = mockDocuments
+            .map((doc) => createDocumentHTML(doc))
+            .join("");
+        }
+      }
+
+      function createDocumentHTML(doc) {
+        const iconClass = doc.type === "pdf" ? "pdf-icon" : "docx-icon";
+        const icon = doc.type === "pdf" ? "📄" : "📝";
+        const statusColor =
+          doc.status === "processed"
+            ? "var(--success-color)"
+            : "var(--warning-color)";
+
+        return `
+                <div class="document-card" data-name="${doc.name.toLowerCase()}">
+                    <div class="document-header">
+                        <div class="document-icon ${iconClass}">${icon}</div>
+                        <div class="document-info">
+                            <div class="document-name">${doc.name}</div>
+                            <div class="document-type">${doc.type.toUpperCase()}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="document-meta">
+                        <div class="document-meta-item">
+                            <span class="document-meta-label">Size:</span>
+                            <span class="document-meta-value">${doc.size}</span>
+                        </div>
+                        <div class="document-meta-item">
+                            <span class="document-meta-label">Pages:</span>
+                            <span class="document-meta-value">${
+                              doc.pages
+                            }</span>
+                        </div>
+                        <div class="document-meta-item">
+                            <span class="document-meta-label">Chunks:</span>
+                            <span class="document-meta-value">${
+                              doc.chunks
+                            }</span>
+                        </div>
+                        <div class="document-meta-item">
+                            <span class="document-meta-label">Uploaded:</span>
+                            <span class="document-meta-value">${
+                              doc.uploadDate
+                            }</span>
+                        </div>
+                        <div class="document-meta-item">
+                            <span class="document-meta-label">Status:</span>
+                            <span class="document-meta-value" style="color: ${statusColor}">${
+          doc.status
+        }</span>
+                        </div>
+                    </div>
+                    
+                    <div class="document-actions">
+                        <button class="action-btn primary" onclick="viewDocument('${
+                          doc.id
+                        }')">View</button>
+                        <button class="action-btn" onclick="downloadDocument('${
+                          doc.id
+                        }')">Download</button>
+                        <button class="action-btn danger" onclick="deleteDocument('${
+                          doc.id
+                        }')">Delete</button>
+                    </div>
+                </div>
+            `;
+      }
+
+      function filterDocuments(query) {
+        const cards = document.querySelectorAll(".document-card");
+        cards.forEach((card) => {
+          const name = card.getAttribute("data-name");
+          if (name.includes(query)) {
+            card.style.display = "block";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+
+      function updateStats() {
+        const totalDocs = mockDocuments.length;
+        const totalPages = mockDocuments.reduce(
+          (sum, doc) => sum + doc.pages,
+          0
+        );
+        const totalChunks = mockDocuments.reduce(
+          (sum, doc) => sum + doc.chunks,
+          0
+        );
+        const lastUpload =
+          mockDocuments.length > 0 ? mockDocuments[0].uploadDate : "-";
+
+        document.getElementById("totalDocuments").textContent = totalDocs;
+        document.getElementById("totalPages").textContent = totalPages;
+        document.getElementById("totalChunks").textContent = totalChunks;
+        document.getElementById("lastUpload").textContent = lastUpload;
+      }
+
+      function viewDocument(docId) {
+        // TODO: Implement document viewing
+        alert("Document viewing functionality coming soon!");
+      }
+
+      function downloadDocument(docId) {
+        // TODO: Implement document download
+        alert("Document download functionality coming soon!");
+      }
+
+      function deleteDocument(docId) {
+        if (confirm("Are you sure you want to delete this document?")) {
+          // TODO: Implement document deletion
+          alert("Document deletion functionality coming soon!");
+        }
+      }
+      
+      // WAIT FOR DOM TO BE READY
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, setting up upload functionality...');
+        
+        // Notification system - DEFINE THIS FIRST
+        function showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            word-wrap: break-word;
+          `;
+
+          // Set colors based on type
+          if (type === 'success') {
+            notification.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            notification.style.color = 'white';
+          } else if (type === 'error') {
+            notification.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            notification.style.color = 'white';
+          } else {
+            notification.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
+            notification.style.color = 'white';
+          }
+
+          document.body.appendChild(notification);
+
+          // Auto remove after 3 seconds
+          setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+
+        // Get elements
+        const fileInput = document.getElementById('fileInput');
+        const chooseFilesBtn = document.getElementById('chooseFilesBtn');
+        
+        console.log('fileInput element:', fileInput);
+        console.log('chooseFilesBtn element:', chooseFilesBtn);
+
+        if (!fileInput || !chooseFilesBtn) {
+          console.error('Elements not found!', {fileInput, chooseFilesBtn});
+          return;
+        }
+
+        // Button click handler
+        chooseFilesBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Choose Files button clicked');
+          fileInput.click();
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', async function(e) {
+          const files = e.target.files;
+          if (files.length === 0) return;
+
+          console.log('File input changed, files selected:', files.length);
+
+          // Show processing message
+          showNotification(`Processing ${files.length} file(s)...`, 'info');
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            console.log('Uploading file:', file.name);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+              console.log('Sending POST to /Upload...');
+              const response = await fetch('/Upload', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+              });
+
+              console.log('Response received:', response.status);
+              const result = await response.json();
+              console.log('Result:', result);
+
+              if (response.ok) {
+                showNotification(`✅ ${file.name} uploaded successfully!`, 'success');
+              } else {
+                showNotification(`❌ Failed to upload ${file.name}: ${result.error}`, 'error');
+              }
+            } catch (error) {
+              console.error('Upload error:', error);
+              showNotification(`❌ Error uploading ${file.name}`, 'error');
+            }
+          }
+
+          // Reset file input
+          fileInput.value = '';
+          console.log('Upload process completed');
+        });
+        
+        console.log('Upload functionality setup complete!');
+      });
+
+      // Add animations to styles
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideInRight {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes slideOutRight {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>

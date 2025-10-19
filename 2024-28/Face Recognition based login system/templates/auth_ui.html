@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Lock · Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script defer src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</head>
+<body data-page="home">
+    <noscript>
+        <div class="noscript-banner">This experience requires JavaScript and camera access. Please enable both to continue.</div>
+    </noscript>
+    <div class="app-shell">
+        <header class="top-nav">
+            <div class="brand">Nebula Lock</div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-links" aria-label="Primary">
+                <a href="/" class="nav-link" data-route="home">Home</a>
+            </nav>
+        </header>
+
+        <main class="page-main home-minimal">
+            <section class="panel-panel hero-panel hero-minimal" data-animate>
+                <div class="hero-minimal-layout">
+                    <div class="hero-copy">
+                        <span class="eyebrow">Cinematic security</span>
+                        <h1>Glide into your account with Nebula Lock</h1>
+                        <p>Enroll once, then unlock future sessions with a balanced blend of biometric ease and credential certainty.</p>
+                        <div class="cta-group">
+                            <a href="/register" class="btn btn-primary">Get started</a>
+                            <a href="/login" class="btn btn-ghost">Sign in</a>
+                        </div>
+                        <ul class="hero-pill-list">
+                            <li>Camera powers up only when you approve</li>
+                            <li>Live capture guidance with calming prompts</li>
+                            <li>Password fallback standing by at every step</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© {{ config.get('APP_NAME', 'Nebula Lock') }} {{ config.get('APP_YEAR', '2025') }}. Built for delightful, dependable sign-ins.</p>
+        </footer>
+    </div>
+</body>
+</html>
