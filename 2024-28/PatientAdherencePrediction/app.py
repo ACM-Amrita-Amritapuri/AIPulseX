@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-
+import numpy as np
 model = joblib.load("best_model.pkl")
 
 st.title("💊 Patient Medication Adherence Prediction App")
@@ -41,13 +41,18 @@ input_data = {
     'Mental_Health_Status': mental_health,
     'Insurance_Coverage': 1 if insurance == "Yes" else 0
 }
-
 input_df = pd.DataFrame([input_data])
+if hasattr(model, "feature_names_in_"):
+    input_df = input_df.reindex(columns=model.feature_names_in_, fill_value=0)
 
 if st.button("Predict"):
     try:
         prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0]
+        
+        if hasattr(model, "predict_proba"):
+            probability = model.predict_proba(input_df)[0]
+        else:
+            probability = [None, None]
 
         if prediction == 1:
             st.success(f"✅ Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
@@ -56,7 +61,7 @@ if st.button("Predict"):
 
         st.write("### Confidence Scores")
         st.write(f"- Adherence: {probability[1]*100:.1f}%")
-        st.write(f"- Non-Adherence: {probability[0]*100:.1f}%")
+        st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
