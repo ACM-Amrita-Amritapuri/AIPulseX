@@ -126,7 +126,8 @@ def chat():
             for s in schedules[-5:]:  # Last 5 schedules
                 tasks_summary = ", ".join([t.get('title', '') for t in s.get('tasks', [])[:3]])
                 schedule_list.append(f"- {s.get('title', 'Untitled')}: {tasks_summary}")
-            schedule_context = "\n\nYour recent schedules:\n" + "\n".join(schedule_list)
+            schedule_context = ("\n\n###Recent Schedules\n"+ "\n".join([f"{i+1}. **{s.get('title', 'Untitled')}** — {', '.join([t.get('title', '') for t in s.get('tasks', [])[:3]]) or 'No tasks listed'}"for i, s in enumerate(schedules[-5:])]))
+
         
         # Create schedule-aware prompt based on intent
         if intent == 'schedule_prep':
@@ -153,8 +154,13 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     except Exception as e:
         print(f"Chat error: {e}")
         # Fallback to simple response if LLM fails
+
         llm_response = {
-            "message": "I'm your AI schedule assistant! I can help you create schedules, manage tasks, and provide productivity tips. Just tell me what you want to do!"
+            "message":(
+                "Sorry, I was unable to process your request right now due to a technical issue."
+                "You can still ask me about schedules, tasks, or productivity tips! If this keeps happening, please try again later."
+            ),
+            "error": True
         }
     
     # Optimize session storage
@@ -165,7 +171,7 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     # Keep only last 50 messages to prevent memory bloat
     chats[session_id].append({
         'timestamp': datetime.now().isoformat(),
-        'user_message': message[:500],  # Limit stored message length
+        'user_message': message if len(message) <= 500 else message[:500], #Only limit if needed
         'bot_response': llm_response
     })
     

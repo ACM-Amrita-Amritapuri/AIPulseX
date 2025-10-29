@@ -207,14 +207,19 @@ if st.button("🎇 Unveil the Destiny!"):
         result = "HIT" if prediction == 1 else "FLOP"
         st.success(f"🏆 Prediction: {result} 🏆\nLights, camera, action! Your movie's fate is sealed! 🎥")
         st.write(f"🌟 Probability of Success: {probability:.2%} 🌟 - The box office whispers its verdict!")
+    except ValueError as ve:
+        if "feature" in str(ve).lower() or "shape" in str(ve).lower():
+            st.error("Feature mismatch! Please check your input values and ensure all required features are present.")
+            st.write("Input features shape:", features.shape)
+            st.write("Feature names:", ", ".join(features.columns))
+        else:
+            st.error(f"⚠️ Oops! Magic failed: {str(ve)} ⚠️")
     except Exception as e:
-        st.error(f"⚠️ Oops! Magic failed: {str(e)} ⚠️\nCheck the spellbook (features) for errors!")
-        st.write("Input features shape:", features.shape)
-        st.write("Feature names:", ", ".join(features.columns))
+        st.error("An unexpected error occurred. Please try again or check your input.")
+        st.write("Technical details:", str(e))
 
 @app.route("/predict", methods=["GET"])
 def predict():
     values = [float(x) for x in request.form.values()]
     pred = model.predict(np.array(values))
     return pred
-
