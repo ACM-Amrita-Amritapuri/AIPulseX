@@ -68,14 +68,70 @@ st.markdown('<div class="sub-header">🔮 Predict if your movie will be a blockb
 st.image("popcorn.webp", caption="🍿 Curtains Up! 🎬", use_container_width=True)
 
 # Input fields with a creative twist
+# -------------------------------------------------------------
+# 🎬 Movie Spell Casting Interface (Streamlit UI)
+# -------------------------------------------------------------
+
+# Display a subheader to introduce the interactive section
 st.subheader("🎨 Cast Your Spell!")
-budget = st.number_input("💰 Budget (in $)", min_value=1000, max_value=400000000, value=5000000, step=1000, help="Unleash your wallet's magic! 💸")
-runtime = st.number_input("⏳ Runtime (minutes)", min_value=30, max_value=300, value=120, step=1, help="Set the stage duration! ⏰")
-genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family",
-          "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction",
-          "Thriller", "War", "Western", "Other"]
-main_genre = st.selectbox("🎭 Genre Magic", genres, help="Choose your movie's soul! 🎥")
-release_month = st.selectbox("📅 Release Month", list(range(1, 13)), help="Pick the perfect premiere date! 🌟")
+
+# -------------------------------------------------------------
+# 💰 Budget Input
+# -------------------------------------------------------------
+# Allow the user to specify the movie's budget in dollars.
+# The slider starts from $1,000 up to $400,000,000 with a default of $5,000,000.
+# The 'help' text gives a playful tooltip when hovered.
+budget = st.number_input(
+    "💰 Budget (in $)",
+    min_value=1000,
+    max_value=400000000,
+    value=5000000,
+    step=1000,
+    help="Unleash your wallet's magic! 💸"
+)
+
+# -------------------------------------------------------------
+# ⏳ Runtime Input
+# -------------------------------------------------------------
+# Ask the user for the duration of the movie in minutes.
+# Default is 120 minutes, ranging from 30 to 300.
+runtime = st.number_input(
+    "⏳ Runtime (minutes)",
+    min_value=30,
+    max_value=300,
+    value=120,
+    step=1,
+    help="Set the stage duration! ⏰"
+)
+
+# -------------------------------------------------------------
+# 🎭 Genre Selection
+# -------------------------------------------------------------
+# Provide a dropdown menu for the user to select the main movie genre.
+# Includes a wide variety of genres to choose from.
+genres = [
+    "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama",
+    "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance",
+    "Science Fiction", "Thriller", "War", "Western", "Other"
+]
+
+main_genre = st.selectbox(
+    "🎭 Genre Magic",
+    genres,
+    help="Choose your movie's soul! 🎥"
+)
+
+# -------------------------------------------------------------
+# 📅 Release Month Selection
+# -------------------------------------------------------------
+# Allow the user to choose the release month (1–12).
+# Each number corresponds to a calendar month.
+release_month = st.selectbox(
+    "📅 Release Month",
+    list(range(1, 13)),
+    help="Pick the perfect premiere date! 🌟"
+)
+
 
 # Process inputs
 def get_season(month):
@@ -120,11 +176,28 @@ if hasattr(model, "feature_names_in_"):
     expected_features = model.feature_names_in_.tolist()
     features = features.reindex(columns=expected_features, fill_value=0)
 else:
-    # Fallback: Assume 23 features based on training logic
-    if len(features.columns) != 23:
-        st.error("Feature mismatch: Expected 23 features, got {}. Check training data genres.".format(len(features.columns)))
-        st.write("Current features:", ", ".join(features.columns))
-        st.stop()
+    # Improved feature mismatch handling
+    expected_features = 23
+    actual_features = len(features.columns)
+
+    if actual_features != expected_features:
+        st.warning(f"⚠️ Feature mismatch detected: Expected {expected_features} features, but received {actual_features}.")
+        st.info("🧩 Tip: This may happen if new genres or input fields were added/removed. Please ensure your dataset matches the model training schema.")
+        st.write("🔍 Current input features:", ", ".join(features.columns))
+
+        # Auto-adjust columns if fewer/more features are present
+        try:
+            missing_cols = [f"feature_{i}" for i in range(expected_features - actual_features)] if actual_features < expected_features else []
+            for col in missing_cols:
+                features[col] = 0  # Default fill for missing features
+
+            if len(features.columns) > expected_features:
+                features = features.iloc[:, :expected_features]  # Trim extra features
+
+            st.success("✨ Automatically aligned feature dimensions to match model expectations.")
+        except Exception as e:
+            st.error(f"🚨 Unable to adjust features automatically: {e}")
+            st.stop()
 
 # Prediction
 if st.button("🎇 Unveil the Destiny!"):

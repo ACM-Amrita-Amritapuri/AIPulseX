@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from flask import Blueprint,request,flash,render_template,redirect,url_for,session,jsonify
-from flask_jwt_extended import create_access_token 
+from flask_jwt_extended import create_access_token #type: ignore
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -27,15 +27,18 @@ user_col=db[os.getenv("COLLECTION_NAME","Users")]
 # Setting up the blueprint
 bp = Blueprint("auth", __name__)
 
-# Creating the register and login routes 
+# Creating the register and login routes
+# Register Route
+ 
 
 @bp.route("/register",methods=['GET','POST'])
 def register():
-    if request.method=='POST':
-        name=request.form["name"]
-        username=request.form['username']
-        password=request.form['password']
-        confirm_pass=request.form['confirm_password']
+    if request.method == 'POST':
+        name = request.form.get('name')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_pass = request.form.get('confirm_password')
+
     
 
         # Checking the name 
@@ -45,27 +48,33 @@ def register():
         
         
         # Validating the username 
-        valid_name,user_issue=validate_username(username=username)
+        valid_name, user_issue = validate_username(username = username )
         if not valid_name:
-            flash(user_issue,"warning")
+            flash(user_issue, "warning")
             return render_template("register.html")
+
         
-        # Validating the password
-        valid_pass,pass_issue=validate_password(password=password)
+        # Step 1: Validate the entered password using a custom validation function
+        # This checks for things like minimum length, special characters, uppercase letters, etc.
+        valid_pass, pass_issue = validate_password(password)
         if not valid_pass:
-            flash(pass_issue,"warning")
+            # If password doesn't meet requirements, show warning
+            flash(pass_issue, "warning")
+            return render_template("register.html")
+        # Step 2: Verify that the entered password and confirm password fields match
+        # This ensures the user didn’t mistype their password
+        if password != confirm_pass:
+            flash("Passwords do not match, try again", "warning")
             return render_template("register.html")
         
-        if password!=confirm_pass:
-            flash("Passwords do not match , try again")
-            return render_template("register.html")
-        
-        # Check if username already exists
+        # Step 3: Check if the username already exists in the database
+        # This prevents duplicate accounts with the same username
         existing_user = user_col.find_one({"username": username})
+
         if existing_user:
+            # Warn user to choose a different username
             flash("Username already exists. Please choose a different username.", "warning")
-            return render_template('register.html')
-        
+            return render_template("register.html")
         # Hashing the password
         try:
             hashed_pass=generate_password_hash(password=password)
@@ -151,7 +160,7 @@ def login():
 def change_password():
     if request.method=='POST':
         if 'user_id' not in session:
-            flash("Login for accessing this page","error")
+            flash("Login to access this page","error")
             redirect(url_for('auth.login'))
         
         user_id=session.get('user_id')
@@ -165,10 +174,12 @@ def change_password():
                 flash("User not found","error")
                 redirect(url_for('auth.login'))
                 
-            # Validating old password
-            if not check_password_hash(user['password'],password=password): #type: ignore
-                flash("Password is invalid")
-                return render_template("change_password.html")
+# Verify the user's current password before proceeding with change
+# The function 'check_password_hash' compares the stored hashed password 
+
+            if not check_password_hash(user.get('password'), password):  # safer access using .get()
+               flash("Invalid password. Please try again.", "warning")
+            return render_template("change_password.html")
                         
             # Validating new password
             valid_pass,pass_issue=validate_password(password=new_password)
@@ -192,9 +203,10 @@ def change_password():
             
 
         except Exception as e:
-            flash("Error while changing password",'error')
             print(f"Error while changing the password: {e}")
             return render_template("change_password.html")
+
+
         
     
     return render_template("change_password.html")
@@ -207,14 +219,23 @@ def logout():
         username = session.get('username', 'Unknown')
         session.clear()
         
-        # Clear application logs on logout
+        # 🧹 Attempt to clear application logs during user logout
         try:
+            # Import the app logging module dynamically (useful if not globally accessible)
             from app import app_logs
+            # Clear all stored logs for the current session/user
             app_logs.clear_logs()
+            # Log the successful log-clear event for tracking and debugging
             app_logger.info(f'Logs cleared for user: {username} on logout')
-        except Exception as e:
+        except : 
+            # Log the error details for troubleshooting
             app_logger.error(f'Error clearing logs on logout: {str(e)}')
         
+
+# -------------------------------------------------------------
+
+# -------------------------------------------------------------
+
         flash("Successfully logged out","success")
     else:
         flash("You have to login first",'error')
@@ -231,7 +252,12 @@ def login_check(f):
             return f(*args, **kwargs)
         else:
             # Check if it's an AJAX request (for JSON responses)
-            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.path.startswith('/Upload'):
+            if (
+                request.is_json
+                or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                or request.path.startswith("/Upload")
+            ):
                 return jsonify({"error": "Not authenticated"}), 401
             return redirect("/")
+        
     return decorated_func
