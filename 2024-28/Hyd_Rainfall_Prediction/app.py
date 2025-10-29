@@ -72,9 +72,15 @@ def preprocess_weather_for_model(api_data):
 
 def predict_rainfall(api_data):
     features = preprocess_weather_for_model(api_data)
-    rain_mm = np.expm1(reg_model.predict(features)[0])  # Regression (reverse log1p)
-    rain_class = clf_model.predict(features)[0]
 
+    # Regression
+    rain_mm_log = float(reg_model.predict(features)[0])
+    rain_mm = float(np.expm1(rain_mm_log))  # reverse log1p -> ensure Python float
+
+    # Classification
+    rain_class = int(clf_model.predict(features)[0])
+
+    # Determine human-readable message
     if rain_class == 1:
         rain_text = (
             "🌦 Light Rain – carry an umbrella ☂️" if rain_mm < 2 else
@@ -84,7 +90,11 @@ def predict_rainfall(api_data):
     else:
         rain_text = "☀ No Rain – enjoy the clear sky!"
 
-    return rain_mm, rain_text
+    return {
+        "rain_mm": round(rain_mm, 2),
+        "rain_text": rain_text,
+        "rain_class": rain_class
+    }
 
 
 # ==========================
@@ -132,7 +142,8 @@ elif page == "🌧 Rainfall Prediction":
             st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
             st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
 
-            rain_mm, rain_text = predict_rainfall(data)
+            result = predict_rainfall(data)
+            rain_mm, rain_text = result["rain_mm"], result["rain_text"]
 
             st.subheader("🌦 Prediction Result")
             st.metric("Predicted Rainfall (mm)", f"{rain_mm:.2f}")
