@@ -131,16 +131,20 @@ def chat():
         
         # Create schedule-aware prompt based on intent
         if intent == 'schedule_prep':
-            # User is preparing to generate a schedule, provide brief acknowledgment
-            enhanced_message = f"""You are a helpful AI schedule assistant. The user has said: "{message}"
-
-Provide a brief, encouraging acknowledgment (1-2 sentences) confirming you understand their request. Mention that you'll use this information when they generate their schedule."""
+            # Preparing to generate a schedule, provide a warm, personalized acknowledgment
+            enhanced_message = (
+                f"You are a friendly and proactive AI schedule assistant. The user said: '{message}'.\n"
+                "Reply with a brief, encouraging acknowledgment (1-2 sentences) that shows you understand their goal. "
+                "Let them know you're ready to help and will use this info when they generate their schedule."
+            )
         else:
             # Regular chat interaction
-            enhanced_message = f"""You are a helpful AI schedule assistant. The user has asked: "{message}"
-{schedule_context}
-
-Provide a helpful, concise response. If they're asking about scheduling, remind them they can click 'Generate Schedule' to create a personalized schedule."""
+            enhanced_message = (
+                f"You are a friendly and proactive AI schedule assistant. The user asked: '{message}'.\n"
+                f"{schedule_context}\n"
+                "Respond with a concise, helpful answer. If the user mentions scheduling, gently remind them about the 'Generate Schedule' button for a personalized plan. "
+                "Be conversational, supportive, and personalize your response if possible."
+            )
         
         # Use streaming for faster response (if supported)
         response=llm.invoke(enhanced_message).content or ""
@@ -280,7 +284,10 @@ def chat_history():
 def clear_chat_history():
     session_id=session.get("username","anon")
     chats[session_id]=[]
-    return jsonify({"message":"cleared"})
+    return jsonify({
+    "type": "success",
+    "title": "Session Cleared",
+    "message": "Your data has been reset successfully!"}), 200
 
 @schedule_bp.route('/api/chat/schedules',methods=['GET'])
 def chat_schedules():
