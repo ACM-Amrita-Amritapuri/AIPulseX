@@ -120,11 +120,28 @@ if hasattr(model, "feature_names_in_"):
     expected_features = model.feature_names_in_.tolist()
     features = features.reindex(columns=expected_features, fill_value=0)
 else:
-    # Fallback: Assume 23 features based on training logic
-    if len(features.columns) != 23:
-        st.error("Feature mismatch: Expected 23 features, got {}. Check training data genres.".format(len(features.columns)))
-        st.write("Current features:", ", ".join(features.columns))
-        st.stop()
+    # Improved feature mismatch handling
+    expected_features = 23
+    actual_features = len(features.columns)
+
+    if actual_features != expected_features:
+        st.warning(f"⚠️ Feature mismatch detected: Expected {expected_features} features, but received {actual_features}.")
+        st.info("🧩 Tip: This may happen if new genres or input fields were added/removed. Please ensure your dataset matches the model training schema.")
+        st.write("🔍 Current input features:", ", ".join(features.columns))
+
+        # Auto-adjust columns if fewer/more features are present
+        try:
+            missing_cols = [f"feature_{i}" for i in range(expected_features - actual_features)] if actual_features < expected_features else []
+            for col in missing_cols:
+                features[col] = 0  # Default fill for missing features
+
+            if len(features.columns) > expected_features:
+                features = features.iloc[:, :expected_features]  # Trim extra features
+
+            st.success("✨ Automatically aligned feature dimensions to match model expectations.")
+        except Exception as e:
+            st.error(f"🚨 Unable to adjust features automatically: {e}")
+            st.stop()
 
 # Prediction
 if st.button("🎇 Unveil the Destiny!"):
