@@ -1,108 +1,105 @@
 # Taskify
 
-A modern task management application built with Flask and MongoDB. Taskify helps you organize, track, and manage your tasks efficiently with a beautiful, responsive user interface.
+A web app for generating personalized learning schedules. Upload PDFs or DOCX files, then use the chat interface to create week-by-week plans based on your materials.
 
-## Features
+Built with Flask, MongoDB, Pinecone, and Google Gemini.
 
-- 🔐 **User Authentication** - Secure login and registration system
-- 📋 **Task Management** - Create, organize, and track your tasks
-- 📊 **Analytics** - Monitor your productivity and task completion rates
-- 🎨 **Modern UI** - Clean, responsive design with dark theme
-- 📱 **Mobile Friendly** - Works seamlessly on all devices
-- ⚡ **Real-time Validation** - Instant feedback on form inputs
-- 🔔 **Smart Notifications** - Flash messages with auto-dismiss
+## Setup
 
-## Tech Stack
-
-- **Backend**: Flask, Python
-- **Database**: MongoDB
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Authentication**: Flask-JWT-Extended
-- **Security**: Werkzeug password hashing
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.8+
+**Requirements:**
+- Python 3.11+
 - MongoDB
-- pip or uv package manager
+- Pinecone account with an existing index
+- Google Gemini API key
 
-### Installation
+**Installation (Windows PowerShell):**
 
-1. Clone the repository:
-
-```bash
+```powershell
 git clone <repository-url>
-cd Taskify
-```
+cd 2024-28/Taskify
 
-2. Install dependencies:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-```bash
 pip install -r requirements.txt
-# or if using uv:
-uv sync
-```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory:
+# Create .env file with the following:
+# SECRET_KEY=your-secret-key
+# MONGODB_URI=mongodb://localhost:27017/
+# DATABASE_NAME=Taskify
+# COLLECTION_NAME=Users
+# GOOGLE_API_KEY=your-google-api-key
+# PINECONE_API_KEY=your-pinecone-api-key
+# INDEX_NAME=your-pinecone-index-name
+# GROQ_API_KEY=your-groq-api-key (optional)
+# GROQ_MODEL=llama-3.3-70b-versatile (optional)
 
-```env
-SECRET_KEY=your-secret-key-here
-MONGODB_URI=mongodb://localhost:27017/
-DATABASE_NAME=Taskify
-COLLECTION_NAME=Users
-```
-
-4. Start MongoDB service
-
-5. Run the application:
-
-```bash
 python app.py
 ```
 
-6. Open your browser and navigate to `http://127.0.0.1:5000`
+Open http://127.0.0.1:5000
+
+## Features
+
+- User registration and login
+- Upload PDF/DOCX files for processing
+- Document search using Pinecone vector store
+- Chat interface powered by Google Gemini
+- Generate multi-week schedules from uploaded materials
+- View activity logs
 
 ## Project Structure
 
 ```
 Taskify/
-├── app.py                 # Main Flask application
+├── app.py                  # Main Flask application
 ├── Backend/
-│   ├── auth.py           # Authentication blueprint
-│   └── utils.py          # Utility functions
+│   ├── auth.py             # Authentication routes
+│   ├── Schedule_gen.py     # Document upload and schedule generation
+│   └── utils.py            # Vector store and LLM utilities
 ├── Frontend/
-│   ├── Templates/        # HTML templates
-│   └── scripts/          # CSS and JavaScript files
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+│   ├── Templates/          # HTML pages
+│   └── scripts/            # CSS and JavaScript
+├── requirements.txt
+└── pyproject.toml
 ```
 
-## Usage
+## Routes
 
-1. **Register**: Create a new account with a username and password
-2. **Login**: Access your dashboard with your credentials
-3. **Dashboard**: View your tasks and productivity metrics
-4. **Task Management**: Create, edit, and organize your tasks (coming soon)
-5. **Analytics**: Track your progress and productivity (coming soon)
+**Authentication:**
+- `GET/POST /register` - Create account
+- `POST /login` - Login (returns JWT)
+- `GET /logout` - Logout
+- `GET/POST /change-password` - Change password
 
-## Contributing
+**Pages:**
+- `GET /` - Landing page
+- `GET /dashboard` - Main dashboard
+- `GET /scheduler` - Schedule interface
+- `GET /documents` - Document upload page
+- `GET /my-documents` - View uploaded documents
+- `GET /logs` - Application logs
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+**API:**
+- `POST /Upload` - Upload and process documents
+- `POST /scheduler/api/chat/message` - Send chat message
+- `POST /scheduler/api/generate` - Generate schedule from input
+- `POST /scheduler/api/generate-from-chat` - Generate schedule from chat history
+- `GET /scheduler/api/schedules` - List all schedules
+- `GET /scheduler/api/schedules/<id>` - Get specific schedule
+- `DELETE /scheduler/api/schedules/<id>` - Delete schedule
+- `GET /scheduler/api/chat/history` - Get chat history
+- `POST /scheduler/api/chat/clear-history` - Clear chat history
+- `GET /api/logs` - Get application logs
+- `POST /api/logs/clear` - Clear logs
+
+## Production
+
+- Set `SESSION_COOKIE_SECURE=True` for HTTPS
+- Disable debug mode
+- Use environment variables for all secrets
+- Configure MongoDB replica set for production workloads
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support or questions, please open an issue in the repository.
-
----
-
-**Taskify** - Making task management simple and efficient! 🚀
+MIT
