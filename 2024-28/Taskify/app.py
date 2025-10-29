@@ -85,7 +85,7 @@ class LogStorage:
 # Global log storage
 app_logs = LogStorage()
 
-# Custom logging handler to capture application logs
+# Custom logging handler 
 class MemoryLogHandler(logging.Handler):
     def emit(self, record):
         try:
