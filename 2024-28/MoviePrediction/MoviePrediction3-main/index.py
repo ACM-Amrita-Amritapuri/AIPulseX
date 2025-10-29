@@ -68,14 +68,70 @@ st.markdown('<div class="sub-header">🔮 Predict if your movie will be a blockb
 st.image("popcorn.webp", caption="🍿 Curtains Up! 🎬", use_container_width=True)
 
 # Input fields with a creative twist
+# -------------------------------------------------------------
+# 🎬 Movie Spell Casting Interface (Streamlit UI)
+# -------------------------------------------------------------
+
+# Display a subheader to introduce the interactive section
 st.subheader("🎨 Cast Your Spell!")
-budget = st.number_input("💰 Budget (in $)", min_value=1000, max_value=400000000, value=5000000, step=1000, help="Unleash your wallet's magic! 💸")
-runtime = st.number_input("⏳ Runtime (minutes)", min_value=30, max_value=300, value=120, step=1, help="Set the stage duration! ⏰")
-genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family",
-          "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction",
-          "Thriller", "War", "Western", "Other"]
-main_genre = st.selectbox("🎭 Genre Magic", genres, help="Choose your movie's soul! 🎥")
-release_month = st.selectbox("📅 Release Month", list(range(1, 13)), help="Pick the perfect premiere date! 🌟")
+
+# -------------------------------------------------------------
+# 💰 Budget Input
+# -------------------------------------------------------------
+# Allow the user to specify the movie's budget in dollars.
+# The slider starts from $1,000 up to $400,000,000 with a default of $5,000,000.
+# The 'help' text gives a playful tooltip when hovered.
+budget = st.number_input(
+    "💰 Budget (in $)",
+    min_value=1000,
+    max_value=400000000,
+    value=5000000,
+    step=1000,
+    help="Unleash your wallet's magic! 💸"
+)
+
+# -------------------------------------------------------------
+# ⏳ Runtime Input
+# -------------------------------------------------------------
+# Ask the user for the duration of the movie in minutes.
+# Default is 120 minutes, ranging from 30 to 300.
+runtime = st.number_input(
+    "⏳ Runtime (minutes)",
+    min_value=30,
+    max_value=300,
+    value=120,
+    step=1,
+    help="Set the stage duration! ⏰"
+)
+
+# -------------------------------------------------------------
+# 🎭 Genre Selection
+# -------------------------------------------------------------
+# Provide a dropdown menu for the user to select the main movie genre.
+# Includes a wide variety of genres to choose from.
+genres = [
+    "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama",
+    "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance",
+    "Science Fiction", "Thriller", "War", "Western", "Other"
+]
+
+main_genre = st.selectbox(
+    "🎭 Genre Magic",
+    genres,
+    help="Choose your movie's soul! 🎥"
+)
+
+# -------------------------------------------------------------
+# 📅 Release Month Selection
+# -------------------------------------------------------------
+# Allow the user to choose the release month (1–12).
+# Each number corresponds to a calendar month.
+release_month = st.selectbox(
+    "📅 Release Month",
+    list(range(1, 13)),
+    help="Pick the perfect premiere date! 🌟"
+)
+
 
 # Process inputs
 def get_season(month):

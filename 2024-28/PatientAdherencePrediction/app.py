@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import numpy as np
+
 model = joblib.load("best_model.pkl")
 
 st.title("💊 Patient Medication Adherence Prediction App")
@@ -41,6 +41,7 @@ input_data = {
     'Mental_Health_Status': mental_health,
     'Insurance_Coverage': 1 if insurance == "Yes" else 0
 }
+
 input_df = pd.DataFrame([input_data])
 
 if st.button("Predict"):
@@ -52,25 +53,10 @@ if st.button("Predict"):
             st.success(f"✅ Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
         else:
             st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0]*100:.1f}% probability)")
-        st.write(f"**Confidence Scores:**")
+
+        st.write("### Confidence Scores")
         st.write(f"- Adherence: {probability[1]*100:.1f}%")
-        st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
-
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    input_features = [float(x) for x in request.form.values()]
-    input_df = pd.DataFrame([input_features])
-
-    try:
-        prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0]
-
-        output = prediction[0]
-        # WRONG: template that doesn't exist
-        return render_template('result_page.html', prediction_text=f'Patient Adherence Level is {output}')
+        st.write(f"- Non-Adherence: {probability[0]*100:.1f}%")
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
