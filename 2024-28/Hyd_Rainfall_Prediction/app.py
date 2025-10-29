@@ -28,25 +28,29 @@ def get_weather_data(city):
 # Helper: Preprocess for model
 # ==========================
 def preprocess_weather_for_model(api_data):
+    """Preprocess API weather data into a feature set for model prediction."""
     main = api_data["main"]
     wind = api_data["wind"]
 
+    # Temperature calculations
     min_temp = main.get("temp_min", main["temp"])
     max_temp = main.get("temp_max", main["temp"])
     avg_temp = (min_temp + max_temp) / 2
 
+    # Humidity calculations
     humidity = main.get("humidity", 50)
     min_humidity = max(humidity - 5, 0)
     max_humidity = min(humidity + 5, 100)
     avg_humidity = (min_humidity + max_humidity) / 2
     humidity_range = max_humidity - min_humidity
 
+    # Wind and rainfall data
     wind_speed = wind.get("speed", 0)
-    wind_range = wind_speed * 0.3  # assumption
-
-    temp_range = max_temp - min_temp
+    wind_range = wind_speed * 0.3
     rainfall = api_data.get("rain", {}).get("1h", 0)
 
+    # Derived features
+    temp_range = max_temp - min_temp
     features = pd.DataFrame([{
         "Avg_Humidity": avg_humidity,
         "AvgTemp_AvgHumidity": avg_temp * avg_humidity,
@@ -56,7 +60,7 @@ def preprocess_weather_for_model(api_data):
         "WindInteraction": wind_range * wind_speed,
         "Temp_Range": temp_range,
         "Wind_Range": wind_range,
-        "precipitation_flag": 1 if rainfall > 0 else 0,
+        "precipitation_flag": int(rainfall > 0),
         "Temp_Humidity_Range": temp_range * humidity_range,
         "temp_rain_interaction": temp_range * rainfall
     }])
