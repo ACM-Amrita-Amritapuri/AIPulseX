@@ -174,10 +174,12 @@ def change_password():
                 flash("User not found","error")
                 redirect(url_for('auth.login'))
                 
-            # Validating old password
-            if not check_password_hash(user['password'],password=password): #type: ignore
-                flash("Password is invalid")
-                return render_template("change_password.html")
+# Verify the user's current password before proceeding with change
+# The function 'check_password_hash' compares the stored hashed password 
+
+            if not check_password_hash(user.get('password'), password):  # safer access using .get()
+               flash("Invalid password. Please try again.", "warning")
+            return render_template("change_password.html")
                         
             # Validating new password
             valid_pass,pass_issue=validate_password(password=new_password)
