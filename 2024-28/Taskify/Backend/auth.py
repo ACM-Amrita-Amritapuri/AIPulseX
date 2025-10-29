@@ -77,7 +77,7 @@ def register():
             return render_template("register.html")
         # Hashing the password
         try:
-            hashed_pass=generate_password_hash(password=password)
+            hashed_pass=generate_password_hash(password=password) #type: ignore
         
             user_data={"username":username,
                    "password":hashed_pass,
@@ -177,7 +177,8 @@ def change_password():
 # Verify the user's current password before proceeding with change
 # The function 'check_password_hash' compares the stored hashed password 
 
-            if not check_password_hash(user.get('password'), password):  # safer access using .get()
+            # safer access using .get()
+            if not check_password_hash(user.get('password'), password):   #type: ignore
                flash("Invalid password. Please try again.", "warning")
             return render_template("change_password.html")
                         
@@ -203,7 +204,7 @@ def change_password():
             
 
         except Exception as e:
-            print(f"Error while changing the password: {e}")
+            print(f"Error while changing the password:{e}")
             return render_template("change_password.html")
 
 
@@ -227,7 +228,7 @@ def logout():
             app_logs.clear_logs()
             # Log the successful log-clear event for tracking and debugging
             app_logger.info(f'Logs cleared for user: {username} on logout')
-        except : 
+        except Exception as e: 
             # Log the error details for troubleshooting
             app_logger.error(f'Error clearing logs on logout: {str(e)}')
         
