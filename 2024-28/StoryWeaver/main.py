@@ -157,7 +157,7 @@ def give_response():
              generates a story or continuation using the trained model.
     Steps typically performed (to be added inside this function):
         1. Receive user input (prompt) from frontend via POST request.
-        2. Process the input (cleaning, tokenizing).
+        2. Process the input
         3. Generate predicted text using a trained model.
         4. Return the generated story as JSON to the frontend.
     """
