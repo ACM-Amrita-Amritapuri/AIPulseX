@@ -92,11 +92,16 @@ def dashboard():
 
     return render_template('dashboard.html', username=username, face_ready=face_ready, token_preview=token_preview)
 
-@auth_bp.route("/login_face",methods=['POST'])
+@auth_bp.route("/login_face", methods=['POST'])
 def login_face():
+    """
+    Authenticate user via facial recognition.
+    Performs up to 3 retry attempts before fallback to credential login.
+    """
     data = request.get_json(silent=True) or {}
 
-    username = (data.get("username") or data.get("usernmae") or "").strip()
+    # Fixed: typo and inconsistent key fallback
+    username = (data.get("username") or "").strip()
     face = data.get("face_image")
     attempt_value = data.get('attempt', 1)
 
@@ -121,35 +126,59 @@ def login_face():
     img = decode_base64_image(image=face)
     if img is None:
         if attempt < 3:
-            return jsonify({'status': 'retry', 'message': f'Unable to read face. {3 - attempt} attempt(s) left.', 'attempt': attempt + 1}), 401
+            return jsonify({
+                'status': 'retry',
+                'message': f'Unable to read face. {3 - attempt} attempt(s) left.',
+                'attempt': attempt + 1
+            }), 401
         return jsonify({'status': 'error', 'message': 'Unable to read facial data. Use credential login instead.'}), 401
 
     embedding = get_embeddings(image=img)
     if embedding is None:
         if attempt < 3:
-            return jsonify({'status': 'retry', 'message': f'Face not recognized. {3 - attempt} attempt(s) left.', 'attempt': attempt + 1}), 401
+            return jsonify({
+                'status': 'retry',
+                'message': f'Face not recognized. {3 - attempt} attempt(s) left.',
+                'attempt': attempt + 1
+            }), 401
         return jsonify({'status': 'error', 'message': 'Face authentication failed. Use credential login.'}), 401
 
-    # embeddings_dir = os.getenv("EMBEDDINGS_DIR") or os.getenv("EMBEDDING_DIR")
+    # Fixed: ensure fallback path is always set correctly
     embeddings_dir = os.getenv("EMBEDDINGS_DIR") or os.getenv("EMBEDDING_DIR") or DEFAULT_EMBEDDING_DIR
     if not embeddings_dir:
-        return jsonify({'status': 'error', 'message': 'Embeddings directory is not configured on the server.'}), 500
+        return jsonify({'status': 'error', 'message': 'Embeddings directory not configured on the server.'}), 500
 
     embedding_path = os.path.join(embeddings_dir, f"{username}.npy")
+
+    # Added: existence and file integrity checks
     if not os.path.exists(embedding_path):
         return jsonify({'status': 'error', 'message': 'No stored embedding found. Please re-register.'}), 404
 
-    stored_emb = np.load(embedding_path)
+    try:
+        stored_emb = np.load(embedding_path)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Corrupted embedding file: {e}'}), 500
 
+    # Safe embedding comparison
     if not compare_embeddings(emb1=embedding, emb2=stored_emb):
         if attempt < 3:
-            return jsonify({'status': 'retry', 'message': f'Face not recognized. {3 - attempt} attempt(s) left.', 'attempt': attempt + 1}), 401
+            return jsonify({
+                'status': 'retry',
+                'message': f'Face not recognized. {3 - attempt} attempt(s) left.',
+                'attempt': attempt + 1
+            }), 401
         return jsonify({'status': 'error', 'message': 'Face authentication failed. Use credential login.'}), 401
 
+    # Token creation and session handling
     token = create_access_token(identity=username)
     session['username'] = username
     session['access token'] = token
-    return jsonify({'status': 'success', 'message': 'Authentication successful.'})
+
+    return jsonify({
+        'status': 'success',
+        'message': f'Authentication successful for user {username}.',
+        'token_preview': f"{token[:18]}…{token[-6:]}" if len(token) > 32 else token
+    })
 
 @auth_bp.route("/login_cred",methods=['POST'])
 def login_cred():
