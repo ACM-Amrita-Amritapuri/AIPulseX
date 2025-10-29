@@ -280,7 +280,10 @@ def chat_history():
 def clear_chat_history():
     session_id=session.get("username","anon")
     chats[session_id]=[]
-    return jsonify({"message":"cleared"})
+    return jsonify({
+    "type": "success",
+    "title": "Session Cleared",
+    "message": "Your data has been reset successfully!"}), 200
 
 @schedule_bp.route('/api/chat/schedules',methods=['GET'])
 def chat_schedules():
