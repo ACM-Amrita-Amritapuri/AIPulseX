@@ -72,24 +72,20 @@ def preprocess_weather_for_model(api_data):
 
 def predict_rainfall(api_data):
     features = preprocess_weather_for_model(api_data)
-
-    # Regression
-    rain_mm_log = reg_model.predict(features)[0]
-    rain_mm = np.expm1(rain_mm_log)  # reverse log1p
-
-    # Classification
+    rain_mm = np.expm1(reg_model.predict(features)[0])  # Regression (reverse log1p)
     rain_class = clf_model.predict(features)[0]
+
     if rain_class == 1:
-        if rain_mm < 2:
-            rain_text = "🌦 Light Rain – carry an umbrella ☂️"
-        elif 2 <= rain_mm < 10:
-            rain_text = "🌧 Moderate Rain – roads might be wet!"
-        else:
-            rain_text = "⛈ Heavy Rain – stay safe outdoors ⚠️"
+        rain_text = (
+            "🌦 Light Rain – carry an umbrella ☂️" if rain_mm < 2 else
+            "🌧 Moderate Rain – roads might be wet!" if rain_mm < 10 else
+            "⛈ Heavy Rain – stay safe outdoors ⚠️"
+        )
     else:
         rain_text = "☀ No Rain – enjoy the clear sky!"
 
     return rain_mm, rain_text
+
 
 # ==========================
 # Streamlit UI
@@ -178,6 +174,7 @@ def predict():
     except Exception as e:
         # Handle unexpected errors gracefully
         return jsonify(error=str(e)), 400
+
 
 
 if __name__ == "__main__":
