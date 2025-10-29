@@ -9,7 +9,7 @@ Built with Flask, MongoDB, Pinecone, and Google Gemini.
 **Requirements:**
 - Python 3.11+
 - MongoDB
-- Pinecone account with an existing index
+- Pinecone account
 - Google Gemini API key
 
 **Installation (Windows PowerShell):**
