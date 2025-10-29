@@ -74,9 +74,10 @@ class LogStorage:
     
     def get_logs(self, limit=None):
         with self.lock:
-            if limit:
-                return list(self.logs)[-limit:]
-            return list(self.logs)
+            logs_snapshot=list(self.logs)
+        if limit:
+            return logs_snapshot[-limit:]
+        return logs_snapshot
     
     def clear_logs(self):
         with self.lock:

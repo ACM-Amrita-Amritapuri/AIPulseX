@@ -82,6 +82,7 @@ def upload_docs():
         return jsonify({"error":"Upload failed"}),500
 
 @schedule_bp.route("/api/chat/save-message", methods=['POST'])
+@login_check #added to ensure only logged-in users can save messages
 def save_message():
     """Save a user message to chat history without generating a response."""
     data = request.get_json() or {}
