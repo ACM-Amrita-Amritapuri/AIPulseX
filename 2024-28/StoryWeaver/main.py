@@ -47,7 +47,7 @@ async def generate_story(prompt):
         text = text.encode('utf8').decode('ascii', 'ignore')
         return text
     
-    next_words=50
+    next_words=60
     # Generate the next sequence of words
     for _ in range(next_words):
          # Step 1: Convert the current text into token sequences
