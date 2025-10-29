@@ -51,25 +51,30 @@ def register():
         valid_name, user_issue = validate_username(username = username )
         if not valid_name:
             flash(user_issue, "warning")
-        return render_template("register.html")
+            return render_template("register.html")
 
         
-        # Validating the password
-        valid_pass,pass_issue=validate_password(password=password)
+        # Step 1: Validate the entered password using a custom validation function
+        # This checks for things like minimum length, special characters, uppercase letters, etc.
+        valid_pass, pass_issue = validate_password(password)
         if not valid_pass:
-            flash(pass_issue,"warning")
+            # If password doesn't meet requirements, show warning
+            flash(pass_issue, "warning")
+            return render_template("register.html")
+        # Step 2: Verify that the entered password and confirm password fields match
+        # This ensures the user didn’t mistype their password
+        if password != confirm_pass:
+            flash("Passwords do not match, try again", "warning")
             return render_template("register.html")
         
-        if password!=confirm_pass:
-            flash("Passwords do not match , try again")
-            return render_template("register.html")
-        
-        # Check if username already exists
+        # Step 3: Check if the username already exists in the database
+        # This prevents duplicate accounts with the same username
         existing_user = user_col.find_one({"username": username})
+
         if existing_user:
+            # Warn user to choose a different username
             flash("Username already exists. Please choose a different username.", "warning")
-            return render_template('register.html')
-        
+            return render_template("register.html")
         # Hashing the password
         try:
             hashed_pass=generate_password_hash(password=password)
