@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from flask import Blueprint,request,flash,render_template,redirect,url_for,session,jsonify
-from flask_jwt_extended import create_access_token 
+from flask_jwt_extended import create_access_token #type: ignore
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -196,9 +196,10 @@ def change_password():
             
 
         except Exception as e:
-            flash("Error while changing password",'error')
             print(f"Error while changing the password: {e}")
             return render_template("change_password.html")
+
+
         
     
     return render_template("change_password.html")
