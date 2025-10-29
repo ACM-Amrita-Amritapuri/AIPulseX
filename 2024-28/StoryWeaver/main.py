@@ -75,16 +75,24 @@ async def generate_story(prompt):
         # This avoids always picking the most probable word (adds natural variation)
         # Sample from the distribution instead of taking max
         predicted_index = np.random.choice(len(prediction), p=prediction)
-        
+        # Initialize an empty string to hold the predicted output word
         output = ""
+        # Step 7: Convert the predicted index back into the actual word
+        # The tokenizer contains a mapping of words to their integer indices (word_index)
+        # We iterate through this dictionary to find which word corresponds to the predicted index
+
         for word, index in tokenizer.word_index.items():
             if index == predicted_index:
-                output = word
-                break
-        
+                output = word  # Found the word corresponding to the predicted index
+                break  # Stop searching once we find the match
+        # Step 8: If a valid word was found from the prediction
         if output:
+            # Append the predicted word to the current prompt
             prompt += ' ' + output
-            
+            # Step 9: Add stopping conditions to prevent runaway text generation
+            # The model stops generating further if:
+            #   - The predicted word is an end punctuation ('.', '!', '?')
+            #   - OR the total word count in the prompt exceeds 100 words
             # Stop if we get punctuation or very long text
             if output in ['.', '!', '?'] or len(prompt.split()) > 100:
                 break
