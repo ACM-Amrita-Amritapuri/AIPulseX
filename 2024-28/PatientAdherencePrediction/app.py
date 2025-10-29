@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 
+# Load model (ensure preprocessing is included inside the model pipeline)
 model = joblib.load("best_model.pkl")
 
 st.title("💊 Patient Medication Adherence Prediction App")
@@ -26,6 +27,7 @@ with col2:
     mental_health = st.selectbox("Mental Health", ["Poor", "Moderate", "Good"])
     insurance = st.selectbox("Insurance Coverage", ["No", "Yes"])
 
+# Encode categorical variables (if preprocessing not in model)
 input_data = {
     'Age': age,
     'Gender': gender,
@@ -46,19 +48,17 @@ input_df = pd.DataFrame([input_data])
 
 if st.button("Predict"):
     try:
-        # Make prediction and get probability scores
         prediction = model.predict(input_df)[0]
         probability = model.predict_proba(input_df)[0]
 
-        # Display prediction result with probability
         if prediction == 1:
-            st.success(f"✅ Patient is likely to ADHERE ({probability[1] * 100:.1f}% confidence)")
+            st.success(f"✅ Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
         else:
-            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0] * 100:.1f}% confidence)")
+            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0]*100:.1f}% probability)")
 
         st.write("### Confidence Scores")
         st.write(f"- Adherence: {probability[1]*100:.1f}%")
-        st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
+        st.write(f"- Non-Adherence: {probability[0]*100:.1f}%")
 
     except Exception as e:
-        st.error(f"⚠️ Prediction failed: {str(e)}")
+        st.error(f"Prediction failed: {e}")
