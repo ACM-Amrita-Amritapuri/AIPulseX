@@ -216,14 +216,24 @@ def logout():
         username = session.get('username', 'Unknown')
         session.clear()
         
-        # Clear application logs on logout
+        # 🧹 Attempt to clear application logs during user logout
         try:
+            # Import the app logging module dynamically (useful if not globally accessible)
             from app import app_logs
+            # Clear all stored logs for the current session/user
             app_logs.clear_logs()
+            # Log the successful log-clear event for tracking and debugging
             app_logger.info(f'Logs cleared for user: {username} on logout')
+            # ⚠️ Handle any exceptions that occur during log clearing
         except Exception as e:
+            # Log the error details for troubleshooting
             app_logger.error(f'Error clearing logs on logout: {str(e)}')
         
+
+# -------------------------------------------------------------
+
+# -------------------------------------------------------------
+
         flash("Successfully logged out","success")
     else:
         flash("You have to login first",'error')
