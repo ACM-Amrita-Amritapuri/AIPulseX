@@ -226,6 +226,14 @@ def check_health():
         })
         
 
-if __name__=="__main__":
-    print("The server is running at: http://127.0.0.1:5000")
-    app.run(debug=True,host='0.0.0.0',port=5000)
+
+# -------------------------------------------------------------
+# 🚀 Application Entry Point
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    print("\n✅ Server is running at: http://127.0.0.1:5000\n")
+    
+    # Start the Flask development server
+    # debug=True enables auto-reload and detailed error pages
+    # host='0.0.0.0' allows access from other devices on the same network
+    app.run(debug=True, host='0.0.0.0', port=5000)
