@@ -48,20 +48,31 @@ async def generate_story(prompt):
         return text
     
     next_words=50
+    # Generate the next sequence of words
     for _ in range(next_words):
-        tokens=tokenizer.texts_to_sequences([clean_data(text=text)])[0]
+         # Step 1: Convert the current text into token sequences
+         # The 'clean_data' function preprocesses the text (lowercase, remove punctuation, etc.)
+        tokens = tokenizer.texts_to_sequences([clean_data(text=text)])[0]
+        # If no valid tokens are found (e.g., text is empty or contains unknown words), stop generation
         if not tokens:
             break
-            
-        tokens=tokens[-(max_sequence_length-1):]
-        tokens=pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
-        
-        prediction=model.predict(tokens, verbose=0)
-        
+        # Step 2: Keep only the last (max_sequence_length - 1) tokens
+        # This ensures the input sequence length matches the model’s expected input size
+        tokens = tokens[-(max_sequence_length - 1):]
+        # Step 3: Pad the sequence so it has a uniform length for the model
+        # Padding is added to the left ('pre') if the sequence is shorter than the required length
+        tokens = pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
+        # Step 4: Predict the next word probabilities using the trained model
+        prediction = model.predict(tokens, verbose=0)
+        # Step 5: Apply temperature scaling to control randomness
+        # A lower temperature (<1) makes predictions more deterministic
+        # A higher temperature (>1) makes them more random and creative
         # Add randomness by using temperature sampling
-        prediction = prediction[0] / 0.7  # temperature
+        temperature = 0.7
+        prediction = prediction[0] / temperature
         prediction = np.exp(prediction) / np.sum(np.exp(prediction))
-        
+        # Step 6: Randomly sample the next word index based on the probability distribution
+        # This avoids always picking the most probable word (adds natural variation)
         # Sample from the distribution instead of taking max
         predicted_index = np.random.choice(len(prediction), p=prediction)
         
