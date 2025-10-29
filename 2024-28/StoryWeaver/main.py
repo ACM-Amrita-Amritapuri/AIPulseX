@@ -7,10 +7,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress INFO and WARNING messages
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Turn off oneDNN optimizations
 warnings.filterwarnings('ignore')
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from flask import Flask,request,jsonify,send_from_directory
+from tensorflow.keras.preprocessing.sequence import pad_sequences #type: ignore
+from flask import Flask,request,jsonify,send_from_directory #type: ignore
 from flask_cors import CORS
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model #type: ignore
 import numpy as np 
 import pickle 
 import traceback 
@@ -52,7 +52,7 @@ async def generate_story(prompt):
     for _ in range(next_words):
          # Step 1: Convert the current text into token sequences
          # The 'clean_data' function preprocesses the text (lowercase, remove punctuation, etc.)
-        tokens = tokenizer.texts_to_sequences([clean_data(text=text)])[0]
+        tokens = tokenizer.texts_to_sequences([clean_data(text=prompt)])[0]
         # If no valid tokens are found (e.g., text is empty or contains unknown words), stop generation
         if not tokens:
             break
@@ -210,7 +210,7 @@ def give_response():
         if not seed:
             return jsonify({"error":"Seed text is required for story generation"}),400
         
-        story=handler(text=seed,next_words=next_words)
+        story = handler(seed)
         
         return jsonify({"story":story}),200
     except Exception as e:
@@ -231,7 +231,7 @@ def check_health():
 # 🚀 Application Entry Point
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    print("\n✅ Server is running at: http://127.0.0.1:5000\n")
+    print("\n Server is running at: http://127.0.0.1:5000\n")
     
     # Start the Flask development server
     # debug=True enables auto-reload and detailed error pages
