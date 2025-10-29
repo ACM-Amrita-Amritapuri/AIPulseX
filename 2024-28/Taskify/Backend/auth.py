@@ -33,11 +33,12 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/register",methods=['GET','POST'])
 def register():
-    if request.method=='POST':
-        name=request.form["name"]
-        username=request.form['username']
-        password=request.form['password']
-        confirm_pass=request.form['confirm_password']
+    if request.method == 'POST':
+        name = request.form.get('name')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_pass = request.form.get('confirm_password')
+
     
 
         # Checking the name 
@@ -47,10 +48,11 @@ def register():
         
         
         # Validating the username 
-        valid_name,user_issue=validate_username(username=username)
+        valid_name, user_issue = validate_username(username = username )
         if not valid_name:
-            flash(user_issue,"warning")
-            return render_template("register.html")
+            flash(user_issue, "warning")
+        return render_template("register.html")
+
         
         # Validating the password
         valid_pass,pass_issue=validate_password(password=password)
