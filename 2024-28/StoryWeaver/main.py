@@ -161,7 +161,7 @@ def give_response():
         3. Generate predicted text using a trained model.
         4. Return the generated story as JSON to the frontend.
     """
-    # (Implementation will go here)
+    
     pass
 
     
