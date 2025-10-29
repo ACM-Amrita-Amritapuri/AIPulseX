@@ -8,7 +8,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Turn off oneDNN optimizations
 warnings.filterwarnings('ignore')
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences #type: ignore
-from flask import Flask,request,jsonify,send_from_directory
+from flask import Flask,request,jsonify,send_from_directory #type: ignore
 from flask_cors import CORS
 from tensorflow.keras.models import load_model #type: ignore
 import numpy as np 
