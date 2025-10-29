@@ -4,6 +4,7 @@ import librosa # type: ignore
 import numpy as np 
 import os 
 import matplotlib.pyplot as plt 
+import tempfile
 
 class_names = ['blues', 'classical', 'country', 'disco', 'hiphop','jazz', 'metal', 'pop', 'reggae', 'rock']
 
@@ -52,10 +53,17 @@ file=st.file_uploader("Upload a .wav file",type=["wav"])
 
 if file is not None:
     st.audio(file,format="audio/wav")
-    
+
     with st.spinner("Extracting features and getting the prediction..."):
-        features=preprocess_file(file)
+    
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(file.read())
+            tmp_path = tmp_file.name
+
+        features=preprocess_file(tmp_path)
         
+        os.remove(tmp_path)
+
         if features is not None:
             preds=model.predict(features)[0]
             predicted_genre=class_names[np.argmax(preds)]
