@@ -27,7 +27,9 @@ user_col=db[os.getenv("COLLECTION_NAME","Users")]
 # Setting up the blueprint
 bp = Blueprint("auth", __name__)
 
-# Creating the register and login routes 
+# Creating the register and login routes
+# Register Route
+ 
 
 @bp.route("/register",methods=['GET','POST'])
 def register():
@@ -231,7 +233,12 @@ def login_check(f):
             return f(*args, **kwargs)
         else:
             # Check if it's an AJAX request (for JSON responses)
-            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.path.startswith('/Upload'):
+            if (
+                request.is_json
+                or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                or request.path.startswith("/Upload")
+            ):
                 return jsonify({"error": "Not authenticated"}), 401
             return redirect("/")
+        
     return decorated_func
