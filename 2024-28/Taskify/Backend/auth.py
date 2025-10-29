@@ -224,8 +224,7 @@ def logout():
             app_logs.clear_logs()
             # Log the successful log-clear event for tracking and debugging
             app_logger.info(f'Logs cleared for user: {username} on logout')
-            # ⚠️ Handle any exceptions that occur during log clearing
-        except Exception as e:
+            
             # Log the error details for troubleshooting
             app_logger.error(f'Error clearing logs on logout: {str(e)}')
         
