@@ -165,7 +165,7 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     # Keep only last 50 messages to prevent memory bloat
     chats[session_id].append({
         'timestamp': datetime.now().isoformat(),
-        'user_message': message[:500],  # Limit stored message length
+        'user_message': message if len(message) <= 500 else message[:500], #Only limit if needed
         'bot_response': llm_response
     })
     
