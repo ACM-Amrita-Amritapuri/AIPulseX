@@ -126,7 +126,8 @@ def chat():
             for s in schedules[-5:]:  # Last 5 schedules
                 tasks_summary = ", ".join([t.get('title', '') for t in s.get('tasks', [])[:3]])
                 schedule_list.append(f"- {s.get('title', 'Untitled')}: {tasks_summary}")
-            schedule_context = "\n\nYour recent schedules:\n" + "\n".join(schedule_list)
+            schedule_context = ("\n\n###Recent Schedules\n"+ "\n".join([f"{i+1}. **{s.get('title', 'Untitled')}** — {', '.join([t.get('title', '') for t in s.get('tasks', [])[:3]]) or 'No tasks listed'}"for i, s in enumerate(schedules[-5:])]))
+
         
         # Create schedule-aware prompt based on intent
         if intent == 'schedule_prep':
