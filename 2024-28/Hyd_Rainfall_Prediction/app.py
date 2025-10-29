@@ -69,7 +69,7 @@ def preprocess_weather_for_model(api_data):
 
 # ==========================
 # Helper: Prediction
-# ==========================
+
 def predict_rainfall(api_data):
     features = preprocess_weather_for_model(api_data)
 
