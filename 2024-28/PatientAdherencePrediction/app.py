@@ -47,6 +47,7 @@ if hasattr(model, "feature_names_in_"):
 
 if st.button("Predict"):
     try:
+        # Make prediction and get probability scores
         prediction = model.predict(input_df)[0]
         
         if hasattr(model, "predict_proba"):
@@ -54,14 +55,15 @@ if st.button("Predict"):
         else:
             probability = [None, None]
 
+        # Display prediction result with probability
         if prediction == 1:
-            st.success(f"✅ Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
+            st.success(f"✅ Patient is likely to ADHERE ({probability[1] * 100:.1f}% confidence)")
         else:
-            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0]*100:.1f}% probability)")
+            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0] * 100:.1f}% confidence)")
 
         st.write("### Confidence Scores")
         st.write(f"- Adherence: {probability[1]*100:.1f}%")
         st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
 
     except Exception as e:
-        st.error(f"Prediction failed: {e}")
+        st.error(f"⚠️ Prediction failed: {str(e)}")
