@@ -155,7 +155,7 @@ def login():
 def change_password():
     if request.method=='POST':
         if 'user_id' not in session:
-            flash("Login for accessing this page","error")
+            flash("Login to access this page","error")
             redirect(url_for('auth.login'))
         
         user_id=session.get('user_id')
