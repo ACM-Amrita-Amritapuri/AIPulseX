@@ -147,10 +147,7 @@ def serve_js():
     return send_from_directory('frontend', 'script.js')
 
 
-# -------------------------------------------------------------
 # Generating the story and returning it to the UI
-# -------------------------------------------------------------
-
 @app.route('/generate', methods=['POST'])
 def give_response():
     """
