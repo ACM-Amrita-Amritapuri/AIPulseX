@@ -113,21 +113,60 @@ app=Flask(__name__,static_folder='frontend',static_url_path='')
 CORS(app)
 
 
-'''Displaying the ui'''
+# -------------------------------------------------------------
+# Displaying the UI (Frontend)
+# -------------------------------------------------------------
+
 @app.route('/')
 def index():
-    return send_from_directory('frontend','index.html')
+    """
+    Route: '/'
+    Purpose: Serves the main HTML file of the frontend.
+    This function sends the 'index.html' file located in the 'frontend' directory.
+    """
+    return send_from_directory('frontend', 'index.html')
+
+
 @app.route('/style.css')
 def serve_css():
+    """
+    Route: '/style.css'
+    Purpose: Serves the CSS stylesheet for the frontend.
+    This ensures the webpage has proper styling when loaded in the browser.
+    """
     return send_from_directory('frontend', 'style.css')
+
 
 @app.route('/script.js')
 def serve_js():
+    """
+    Route: '/script.js'
+    Purpose: Serves the JavaScript file for the frontend.
+    This script handles user interactions and API calls to the backend.
+    """
     return send_from_directory('frontend', 'script.js')
 
-'''Generating the story and returning it to the ui'''
-@app.route('/generate',methods=['POST'])
+
+# -------------------------------------------------------------
+# Generating the story and returning it to the UI
+# -------------------------------------------------------------
+
+@app.route('/generate', methods=['POST'])
 def give_response():
+    """
+    Route: '/generate'
+    Method: POST
+    Purpose: Handles incoming text prompts from the frontend UI and 
+             generates a story or continuation using the trained model.
+    Steps typically performed (to be added inside this function):
+        1. Receive user input (prompt) from frontend via POST request.
+        2. Process the input (cleaning, tokenizing).
+        3. Generate predicted text using a trained model.
+        4. Return the generated story as JSON to the frontend.
+    """
+    # (Implementation will go here)
+    pass
+
     
     try:
         data=request.get_json()
