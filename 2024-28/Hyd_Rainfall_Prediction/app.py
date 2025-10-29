@@ -4,18 +4,17 @@ import pandas as pd
 import numpy as np
 import joblib
 from datetime import datetime
-from flask import Flask, request, render_template, jsonify
 
 # ==========================
 # Load trained models
 # ==========================
-reg_model = joblib.load("reg_pipeline.pkl")   # regression pipeline
-clf_model = joblib.load("clf_pipeline.pkl")   # classification pipeline
+reg_model = joblib.load("reg_pipeline.pkl")   # Regression pipeline
+clf_model = joblib.load("clf_pipeline.pkl")   # Classification pipeline
 
 API_KEY = "d985a85e680ff6ef6df85acd61fe9ab3"
 
 # ==========================
-# Helper: Get weather data
+# Helper: Fetch weather data
 # ==========================
 def get_weather_data(city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
@@ -25,7 +24,7 @@ def get_weather_data(city):
     return None
 
 # ==========================
-# Helper: Preprocess for model
+# Helper: Preprocess for Model
 # ==========================
 def preprocess_weather_for_model(api_data):
     """Preprocess API weather data into a feature set for model prediction."""
@@ -68,14 +67,24 @@ def preprocess_weather_for_model(api_data):
     return features
 
 # ==========================
+<<<<<<< HEAD
+# Prediction Handler
+# ==========================
+=======
 # Helper: Prediction
 
+>>>>>>> 6e34100e14c0582444d24eeabab87272b3cb782c
 def predict_rainfall(api_data):
     features = preprocess_weather_for_model(api_data)
 
     # Regression
+<<<<<<< HEAD
+    rain_mm_log = reg_model.predict(features)[0]
+    rain_mm = np.expm1(rain_mm_log)
+=======
     rain_mm_log = float(reg_model.predict(features)[0])
     rain_mm = float(np.expm1(rain_mm_log))  # reverse log1p -> ensure Python float
+>>>>>>> 6e34100e14c0582444d24eeabab87272b3cb782c
 
     # Classification
     rain_class = int(clf_model.predict(features)[0])
@@ -102,40 +111,34 @@ def predict_rainfall(api_data):
 # ==========================
 st.set_page_config(page_title="Weather Guide", page_icon="🌦", layout="centered")
 
-st.markdown("<h1 style='text-align: center; font-size: 45px;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size:18px;'>Get live weather info worldwide & predict rainfall in Telangana</p>", unsafe_allow_html=True)
-
+st.markdown("<h1 style='text-align: center;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
 page = st.sidebar.radio("📌 Navigate", ["🌍 Weather Info", "🌧 Rainfall Prediction"])
 
-# ==========================
-# Page 1: Global Weather Info
-# ==========================
+# --------------------------
+# Page 1: Weather Info
+# --------------------------
 if page == "🌍 Weather Info":
-    st.header("🌍 Global Weather Information")
-    city = st.text_input("Enter City Name (e.g., London, New York, Hyderabad):")
-
-    if st.button("Get Weather 🌡️"):
+    city = st.text_input("Enter a City Name:")
+    if st.button("Get Weather 🌡"):
         data = get_weather_data(city)
         if data:
             st.success(f"✅ Weather in {city.title()}")
-            st.write("**🌤 Condition:**", data["weather"][0]["description"].title())
+            st.write("**🌤 Condition:**", data["weather"][0]["description"])
             st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
             st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
             st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
         else:
-            st.error("⚠️ City not found or API error.")
+            st.error("⚠️ Invalid city or API limit exceeded")
 
-# ==========================
-# Page 2: Telangana Rainfall Prediction
-# ==========================
+# --------------------------
+# Page 2: Telangana Rainfall
+# --------------------------
 elif page == "🌧 Rainfall Prediction":
-    st.header("🌧 Telangana Rainfall Prediction")
     district = st.text_input("Enter Telangana District:")
-
     if st.button("Predict Rainfall 🌦"):
-        city = district + ",IN"   # to query OpenWeather
+        city = district + ",IN"
         data = get_weather_data(city)
-
+        
         if data:
             st.subheader(f"📍 Live Weather in {district.title()}")
             st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
@@ -145,12 +148,13 @@ elif page == "🌧 Rainfall Prediction":
             result = predict_rainfall(data)
             rain_mm, rain_text = result["rain_mm"], result["rain_text"]
 
-            st.subheader("🌦 Prediction Result")
             st.metric("Predicted Rainfall (mm)", f"{rain_mm:.2f}")
             st.markdown(f"<h3 style='color:blue;'>{rain_text}</h3>", unsafe_allow_html=True)
         else:
-            st.error("⚠️ District not found or API error.")
+            st.error("⚠️ District not found or API error")
 
+<<<<<<< HEAD
+=======
 # ==========================
 # Flask API for Prediction
 # ==========================
@@ -191,3 +195,4 @@ def predict():
 if __name__ == "__main__":
     print("The Flask prediction API is running at: http://127.0.0.1:5000/predict")
     app.run(debug=True, host='0.0.0.0', port=5000)
+>>>>>>> 6e34100e14c0582444d24eeabab87272b3cb782c
