@@ -42,44 +42,56 @@ print(f"Model loaded with max sequence length: {max_sequence_length}")
 async def generate_story(prompt):
     
     def clean_data(text):
-        text=str(text).lower()
-        text=''.join([i for i in text if i not in string.punctuation])
-        text=text.encode('utf8').decode('ascii','ignore')
+        text = str(text).lower()
+        text = ''.join([i for i in text if i not in string.punctuation])
+        text = text.encode('utf8').decode('ascii', 'ignore')
         return text
-    
-    next_words=50
+
+    # Ensure prompt is not empty
+    if not prompt or not prompt.strip():
+        return "Error: Empty prompt provided."
+
+    next_words = 50
     for _ in range(next_words):
-        tokens=tokenizer.texts_to_sequences([clean_data(text=text)])[0]
+        # Clean the prompt and convert to token sequence
+        cleaned_prompt = clean_data(text=prompt)
+        tokens = tokenizer.texts_to_sequences([cleaned_prompt])[0]  # Fixed line 52
+
+        # Check if tokens are empty
         if not tokens:
-            break
-            
-        tokens=tokens[-(max_sequence_length-1):]
-        tokens=pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
-        
-        prediction=model.predict(tokens, verbose=0)
-        
-        # Add randomness by using temperature sampling
-        prediction = prediction[0] / 0.7  # temperature
+            return prompt.title()  # Return current prompt if tokenization fails
+
+        # Truncate to max_sequence_length - 1 to leave room for prediction
+        tokens = tokens[-(max_sequence_length-1):]
+        tokens = pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
+
+        # Predict next word probabilities
+        prediction = model.predict(tokens, verbose=0)
+
+        # Add randomness with temperature sampling
+        prediction = prediction[0] / 0.7  # Temperature
         prediction = np.exp(prediction) / np.sum(np.exp(prediction))
-        
-        # Sample from the distribution instead of taking max
+
+        # Sample from the distribution
         predicted_index = np.random.choice(len(prediction), p=prediction)
-        
+
+        # Convert index to word
         output = ""
         for word, index in tokenizer.word_index.items():
             if index == predicted_index:
                 output = word
                 break
-        
+
+        # Append predicted word to prompt
         if output:
             prompt += ' ' + output
-            
-            # Stop if we get punctuation or very long text
+
+            # Stop if punctuation or max length reached
             if output in ['.', '!', '?'] or len(prompt.split()) > 100:
                 break
         else:
             break
-    
+
     return prompt.title()
 
 def handler(prompt):
