@@ -153,8 +153,13 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     except Exception as e:
         print(f"Chat error: {e}")
         # Fallback to simple response if LLM fails
+
         llm_response = {
-            "message": "I'm your AI schedule assistant! I can help you create schedules, manage tasks, and provide productivity tips. Just tell me what you want to do!"
+            "message":(
+                "Sorry, I was unable to process your request right now due to a technical issue."
+                "You can still ask me about schedules, tasks, or productivity tips! If this keeps happening, please try again later."
+            ),
+            "error": True
         }
     
     # Optimize session storage
