@@ -189,14 +189,15 @@ def generate_schedule():
         username = session.get('username', 'unknown')
         context,_analysis=get_context(user_input)
         schedule=process_schedule(user_input,context)
-        # enrich for frontend list
+        # feat: enriched for frontend list
         schedule_obj={
             **schedule,
-            "id": f"sch-{len(schedules)+1}",
-            "title": title or schedule.get("title","AI Generated Schedule"),
-            "description": description or schedule.get("description",""),
-            "created_at": datetime.now().isoformat(),
-            "status": "active"
+              "id": f"sch-{len(schedules)+1}",
+              "title": (title if title.strip() else schedule.get("title", "AI Generated Schedule")),
+              "description": (description if description.strip() else schedule.get("description", "")),
+              "created_at": datetime.now(datetime.timezone.utc).isoformat(),
+              "created_by": username,
+              "status": "active"
         }
         
         schedules.append(schedule_obj)
