@@ -26,7 +26,8 @@ if uploaded_files:
 
         prediction = model.predict(img_array)
         predicted_class = class_names[np.argmax(prediction)]
-        confidence = np.max(prediction) * 100
+        confidence = np.max(prediction)*100
+        # we multiplied with 100 to convert it into percentage
 
         if predicted_class == "PNEUMONIA":
             st.error(f"🔴 Prediction: **{predicted_class}** ({confidence:.2f}%)")
