@@ -244,9 +244,18 @@ training_columns = ["budget", "runtime"] + genre_columns + season_columns
 features = features.reindex(columns=training_columns, fill_value=0)
 
 # Get model’s expected feature names if available
+
 if hasattr(model, "feature_names_in_"):
     expected_features = model.feature_names_in_.tolist()
+    missing = [f for f in expected_features if f not in features.columns]
+    extra = [f for f in features.columns if f not in expected_features]
+
+    for col in missing:
+        features[col] = 0
     features = features.reindex(columns=expected_features, fill_value=0)
+
+    if missing or extra:
+        st.info(f"Auto-aligned features — {len(missing)} added, {len(extra)} ignored.")
 else:
     # Improved feature mismatch handling
     expected_features = 23
