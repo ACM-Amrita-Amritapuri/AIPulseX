@@ -225,10 +225,17 @@ def list_schedules():
 
 @schedule_bp.route('/api/schedules/<sid>', methods=['GET'])
 def get_schedule(sid):
-    for s in schedules:
-        if s.get('id') == sid:
-            return jsonify(s)
-    return jsonify({"error": "Not found"}), 404
+    if not sid:
+        return jsonify({"error": "Schedule ID is required"}), 400
+    try:
+        schedule_item = next((s for s in schedules if s.get('id') == sid), None)
+        if schedule_item:
+            return jsonify(schedule_item), 200
+        else:
+            return jsonify({"error": f"Schedule with ID '{sid}' not found"}), 404
+    except Exception as e:
+        app_logger.error(f"Error fetching schedule {sid}: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @schedule_bp.route('/api/generate-from-chat', methods=['POST'])
