@@ -45,8 +45,6 @@ def load_users():
     return {}
 
 def save_users(users):
-    # with open(user_file,'w') as f: #type: ignore
-    #     json.dump(users,f,indent=4)
     if not user_file:
         return
 
@@ -58,23 +56,27 @@ def save_users(users):
     
 """Image Embedding generation"""
 
-
+# Decode base64 image
 def decode_base64_image(image):
     data=base64.b64decode(image)
     arr=np.frombuffer(data,np.uint8)
     return cv2.imdecode(arr,cv2.IMREAD_COLOR) 
 
+# Get embeddings from image
 def get_embeddings(image):
     try:
         out=DeepFace.represent(img_path=image,model_name="Facenet",enforce_detection=True)
         emb=np.array(out[0]['embedding'],dtype=np.float32)
         emb /=norm(emb)
         return emb
-    except Exception as e:
-        print(e)
+    except Exception:
         return None
     
-    
+# Compare two embeddings and return boolean
 def compare_embeddings(emb1,emb2,threshold=0.25):
     cos_sim=np.dot(emb1,emb2)/(norm(emb1)* norm(emb2))
-    return cos_sim > (1-threshold)
+    
+    if cos_sim > (1-threshold):
+        return True
+    else:
+        return False
