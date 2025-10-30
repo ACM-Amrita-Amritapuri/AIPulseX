@@ -77,53 +77,18 @@ if file is not None and model is not None:
         
         # Remove the temporary file
         os.remove(tmp_path)
-
         if features is not None:
-            # Make prediction
-            preds = model.predict(features)[0]
-            predicted_genre = class_names[np.argmax(preds)]
-            confidence = preds[np.argmax(preds)] * 100
-            
-            # Display results
+            preds=model.predict(features)[0]
+            predicted_genre=class_names[np.argmax(preds)]
+            confidence=preds[np.argmax(preds)]*100
             st.success(f"**Predicted Genre:** {predicted_genre}")
-            st.info(f"**Confidence:** {confidence:.2f}%")
-            
-            st.markdown("---")
-            
-            # Display prediction probabilities
-            st.subheader("Prediction Probabilities")
-            prob_df = pd.DataFrame({
-                'Genre': class_names,
-                'Probability': preds
-            }).sort_values(by='Probability', ascending=False)
-            
-            st.bar_chart(prob_df.set_index('Genre'))
-
-            # "Behind-the-Scenes" expander
-            with st.expander("See 'Behind-the-Scenes' Analysis 🔬"):
-                st.markdown("""
-                <p>
-                The model doesn't "listen" to music like we do. Instead, it analyzes a 
-                visual representation of the audio's frequency content called a 
-                <b>Mel-Frequency Cepstrum (MFCC)</b>.
-                </p>
-                <p>
-                This chart shows the MFCC that was extracted from your file and fed into the model.
-                </p>
-                """, unsafe_allow_html=True)
-                
-                # Plot the MFCC
-                fig, ax = plt.subplots()
-                img = librosa.display.specshow(mfcc_plot_data, x_axis='time', ax=ax)
-                fig.colorbar(img, ax=ax, format='%+2.0f dB')
-                ax.set(title='MFCC of Your Audio')
-                st.pyplot(fig)
-        
-        else:
-            st.error("Could not process the audio file. Please try a different .wav file.")
-
-elif model is None:
-    st.error("Model could not be loaded. Please check the model file.")
+            st.info(f"CONFIDENCE: 'x`{confidence:.2f}%'")
+            # Displaying the full prediction distribution
+            fig, ax = plt.subplots()
+            ax.pie(preds, labels=class_names, autopct='%1.1f%%',
+                   startangle=140, textprops={'fontsize': 8})
+            ax.axis('equal')
+            st.pyplot(fig)
 
 else:
     # Landing page info
