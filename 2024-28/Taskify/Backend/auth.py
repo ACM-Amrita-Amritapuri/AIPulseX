@@ -160,8 +160,8 @@ def login():
 def change_password():
     if request.method=='POST':
         if 'user_id' not in session:
-            flash("Login to access this page","error")
-            redirect(url_for('auth.login'))
+           flash("Login to access this page","error")
+           return redirect(url_for('auth.login'))
         
         user_id=session.get('user_id')
         try:
@@ -172,7 +172,7 @@ def change_password():
             
             if not user:
                 flash("User not found","error")
-                redirect(url_for('auth.login'))
+                return redirect(url_for('auth.login'))
                 
 # Verify the user's current password before proceeding with change
 # The function 'check_password_hash' compares the stored hashed password 
@@ -204,8 +204,9 @@ def change_password():
             
 
         except Exception as e:
-            print(f"Error while changing the password:{e}")
+            flash("Error while changing password",'error')
             return render_template("change_password.html")
+            
 
 
         
