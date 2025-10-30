@@ -47,24 +47,28 @@ input_df = pd.DataFrame([input_data])
 
 if st.button("Predict"):
     try:
-        # Make prediction and get probability scores
-        prediction = model.predict(input_df)[0]
-        
-        if hasattr(model, "predict_proba"):
-            probability = model.predict_proba(input_df)[0]
-        else:
-            probability = [None, None]
+        with st.spinner("Predicting..."):
+            y_pred = model.predict(input_df)[0]
+            proba_fn = getattr(model, "predict_proba", None)
+            if callable(proba_fn):
+                _probs = proba_fn(input_df)
+                probs = np.asarray(_probs)[0]
+            else:
+                probs = None
 
-        # Display prediction result with probability
-        if prediction == 1:
-            st.success(f"✅ Patient is likely to ADHERE ({probability[1] * 100:.1f}% confidence)")
+        adhered = (y_pred == 1)
+        if adhered:
+            conf = f" ({probs[1]*100:.1f}% confidence)" if probs is not None else ""
+            st.success(f"Patient is likely to ADHERE{conf}")
         else:
-            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0] * 100:.1f}% confidence)")
+            conf = f" ({probs[0]*100:.1f}% confidence)" if probs is not None else ""
+            st.error(f"Patient is likely to NOT ADHERE{conf}")
 
-        # Confidence breakdown
-        st.write("### Confidence Scores")
-        st.write(f"- Adherence: {probability[1]*100:.1f}%")
-        st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
+        if probs is not None:
+            st.write("### Confidence")
+            c1, c2 = st.columns(2)
+            c1.metric("Adherence", f"{probs[1]*100:.1f}%")
+            c2.metric("Non-adherence", f"{probs[0]*100:.1f}%")
 
     except Exception as e:
-        st.error(f"⚠️ Prediction failed: {str(e)}")
+        st.error(f"Prediction failed: {e}")
