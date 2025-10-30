@@ -91,44 +91,62 @@ def predict_rainfall(api_data):
 # ==========================
 st.set_page_config(page_title="Weather Guide", page_icon="🌦", layout="centered")
 
-st.markdown("<h1 style='text-align: center;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color:#0072B2;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
+st.divider()
 page = st.sidebar.radio("📌 Navigate", ["🌍 Weather Info", "🌧 Rainfall Prediction"])
 
 # --------------------------
 # Page 1: Weather Info
 # --------------------------
 if page == "🌍 Weather Info":
-    city = st.text_input("Enter a City Name:")
-    if st.button("Get Weather 🌡"):
-        data = get_weather_data(city)
+    city = st.text_input("🏙️ Enter a City Name:")
+    if st.button("Check Weather 🌦️"):
+        with st.spinner("Fetching live weather data..."):
+            data = get_weather_data(city)
         if data:
             st.success(f"✅ Weather in {city.title()}")
-            st.write("**🌤 Condition:**", data["weather"][0]["description"])
-            st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
-            st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
-            st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
+            st.write("**🌤 Condition:**", data["weather"][0]["description"].title())
+            st.write("**🌡 Temperature:**", f"{data['main']['temp']} °C")
+            st.write("**💧 Humidity:**", f"{data['main']['humidity']} %")
+            st.write("**🌀 Wind Speed:**", f"{data['wind']['speed']} m/s")
         else:
-            st.error("⚠️ Invalid city or API limit exceeded")
+            st.error("⚠️ Invalid city name or API limit exceeded.")
 
 # --------------------------
 # Page 2: Telangana Rainfall
 # --------------------------
 elif page == "🌧 Rainfall Prediction":
-    district = st.text_input("Enter Telangana District:")
-    if st.button("Predict Rainfall 🌦"):
+    district = st.text_input("🏘️ Enter Telangana District:")
+    if st.button("Predict Rainfall 🌧"):
         city = district + ",IN"
-        data = get_weather_data(city)
-        
+        with st.spinner("Analyzing weather data..."):
+            data = get_weather_data(city)
         if data:
             st.subheader(f"📍 Live Weather in {district.title()}")
-            st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
-            st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
-            st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
+            st.write("**🌡 Temperature:**", f"{data['main']['temp']} °C")
+            st.write("**💧 Humidity:**", f"{data['main']['humidity']} %")
+            st.write("**🌀 Wind Speed:**", f"{data['wind']['speed']} m/s")
 
             rain_mm, rain_text = predict_rainfall(data)
 
             st.metric("Predicted Rainfall (mm)", f"{rain_mm:.2f}")
-            st.markdown(f"<h3 style='color:blue;'>{rain_text}</h3>", unsafe_allow_html=True)
-        else:
-            st.error("⚠️ District not found or API error")
 
+            st.markdown(
+                f"""
+                <div style='padding:12px; background-color:#E3F2FD; border-radius:10px;'>
+                <h3 style='color:#0056b3;'>{rain_text}</h3>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.error("⚠️ District not found or API error occurred.")
+
+# --------------------------
+# Footer
+# --------------------------
+st.divider()
+st.markdown(
+    f"<p style='text-align:center; font-size:13px; color:gray;'>⏰ Last updated at {datetime.now().strftime('%I:%M %p, %d %b %Y')}</p>",
+    unsafe_allow_html=True
+)
