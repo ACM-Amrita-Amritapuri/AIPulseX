@@ -47,7 +47,7 @@ async def generate_story(prompt):
         text = text.encode('utf8').decode('ascii', 'ignore')
         return text
     
-    next_words=50
+    next_words=60
     # Generate the next sequence of words
     for _ in range(next_words):
          # Step 1: Convert the current text into token sequences
@@ -80,8 +80,8 @@ async def generate_story(prompt):
     # Ensure prompt is not empty
     if not prompt or not prompt.strip():
         return "Error: Empty prompt provided."
-
-    next_words = 50
+    text = prompt
+    next_words = 60
     for _ in range(next_words):
         # Clean the prompt and convert to token sequence
         cleaned_prompt = clean_data(text=prompt)
@@ -118,7 +118,7 @@ async def generate_story(prompt):
         # Step 8: If a valid word was found from the prediction
                 output = word
                 break
-
+        return text
         # Append predicted word to prompt
         if output:
             # Append the predicted word to the current prompt
