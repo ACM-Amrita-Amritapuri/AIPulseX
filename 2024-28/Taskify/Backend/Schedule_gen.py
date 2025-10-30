@@ -126,20 +126,25 @@ def chat():
             for s in schedules[-5:]:  # Last 5 schedules
                 tasks_summary = ", ".join([t.get('title', '') for t in s.get('tasks', [])[:3]])
                 schedule_list.append(f"- {s.get('title', 'Untitled')}: {tasks_summary}")
-            schedule_context = "\n\nYour recent schedules:\n" + "\n".join(schedule_list)
+            schedule_context = ("\n\n###Recent Schedules\n"+ "\n".join([f"{i+1}. **{s.get('title', 'Untitled')}** — {', '.join([t.get('title', '') for t in s.get('tasks', [])[:3]]) or 'No tasks listed'}"for i, s in enumerate(schedules[-5:])]))
+
         
         # Create schedule-aware prompt based on intent
         if intent == 'schedule_prep':
-            # User is preparing to generate a schedule, provide brief acknowledgment
-            enhanced_message = f"""You are a helpful AI schedule assistant. The user has said: "{message}"
-
-Provide a brief, encouraging acknowledgment (1-2 sentences) confirming you understand their request. Mention that you'll use this information when they generate their schedule."""
+            # Preparing to generate a schedule, provide a warm, personalized acknowledgment
+            enhanced_message = (
+                f"You are a friendly and proactive AI schedule assistant. The user said: '{message}'.\n"
+                "Reply with a brief, encouraging acknowledgment (1-2 sentences) that shows you understand their goal. "
+                "Let them know you're ready to help and will use this info when they generate their schedule."
+            )
         else:
             # Regular chat interaction
-            enhanced_message = f"""You are a helpful AI schedule assistant. The user has asked: "{message}"
-{schedule_context}
-
-Provide a helpful, concise response. If they're asking about scheduling, remind them they can click 'Generate Schedule' to create a personalized schedule."""
+            enhanced_message = (
+                f"You are a friendly and proactive AI schedule assistant. The user asked: '{message}'.\n"
+                f"{schedule_context}\n"
+                "Respond with a concise, helpful answer. If the user mentions scheduling, gently remind them about the 'Generate Schedule' button for a personalized plan. "
+                "Be conversational, supportive, and personalize your response if possible."
+            )
         
         # Use streaming for faster response (if supported)
         response=llm.invoke(enhanced_message).content or ""
@@ -153,8 +158,13 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     except Exception as e:
         print(f"Chat error: {e}")
         # Fallback to simple response if LLM fails
+
         llm_response = {
-            "message": "I'm your AI schedule assistant! I can help you create schedules, manage tasks, and provide productivity tips. Just tell me what you want to do!"
+            "message":(
+                "Sorry, I was unable to process your request right now due to a technical issue."
+                "You can still ask me about schedules, tasks, or productivity tips! If this keeps happening, please try again later."
+            ),
+            "error": True
         }
     
     # Optimize session storage
@@ -165,7 +175,7 @@ Provide a helpful, concise response. If they're asking about scheduling, remind 
     # Keep only last 50 messages to prevent memory bloat
     chats[session_id].append({
         'timestamp': datetime.now().isoformat(),
-        'user_message': message[:500],  # Limit stored message length
+        'user_message': message if len(message) <= 500 else message[:500], #Only limit if needed
         'bot_response': llm_response
     })
     
@@ -274,7 +284,10 @@ def chat_history():
 def clear_chat_history():
     session_id=session.get("username","anon")
     chats[session_id]=[]
-    return jsonify({"message":"cleared"})
+    return jsonify({
+    "type": "success",
+    "title": "Session Cleared",
+    "message": "Your data has been reset successfully!"}), 200
 
 @schedule_bp.route('/api/chat/schedules',methods=['GET'])
 def chat_schedules():
