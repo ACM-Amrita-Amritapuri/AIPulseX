@@ -1,33 +1,36 @@
 import warnings
 warnings.filterwarnings('ignore')
 
-from flask import Blueprint,render_template,flash,request,session,jsonify
+from flask import Blueprint, render_template, flash, request, session, jsonify
 from werkzeug.utils import secure_filename
-from .auth import login_check 
-from .utils import process_doc, get_user_documents
+from .auth import login_check
+from .utils import process_doc, get_user_documents, get_context, process_schedule
 import tempfile
 import os
 import json
 import logging
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 from langchain_google_genai import ChatGoogleGenerativeAI
-from datetime import datetime
-from .utils import get_context,process_schedule
 
-# Get application logger
+# Initialize logger
 app_logger = logging.getLogger('app')
-
 load_dotenv()
 
-doc_bp=Blueprint("document",__name__)
-schedule_bp=Blueprint("scheduler",__name__,url_prefix='/scheduler')
+# Blueprints
+doc_bp = Blueprint("document", __name__)
+schedule_bp = Blueprint("scheduler", __name__, url_prefix='/scheduler')
 
+# Model initialization
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=0.2)
 
-llm=ChatGoogleGenerativeAI(model="gemini-2.5-pro",temperature=0.2) 
+# In-memory storage (temporary)
+schedules = []
+chats = {}
 
-schedules=[]
-chats={}
-
+# ====================================================================
+# 📁 DOCUMENT UPLOAD & MANAGEMENT
+# ====================================================================
 
 @doc_bp.route("/my-documents")
 @login_check
@@ -38,273 +41,241 @@ def my_documents():
     return render_template('my_documents.html', documents=documents, username=username)
 
 
-@doc_bp.route("/Upload",methods=['POST'])
+@doc_bp.route("/upload", methods=['POST'])
 @login_check
 def upload_docs():
-    
-    if not request.files:
-        flash("No files selected",'error')
-        return jsonify({"error":"No file provided"}),400
-    f_name=secure_filename(request.files['file'].filename) #type: ignore
-    
-    
-    if not f_name:
-        flash("Couldnt uplaod the file","file")
-        return jsonify({"error":"Invalid file name"}),400
-    
-    if f_name.endswith(".pdf"):
-        doc_type="pdf"
-    elif f_name.endswith(".docx"):
-        doc_type="docx"
-    else:
-        return jsonify({"error":"Unsupported file type"}),400
-        
+    """Handle document uploads (PDF or DOCX)."""
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files['file']
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        flash("Couldn't upload the file", "error")
+        return jsonify({"error": "Invalid file name"}), 400
+
+    ext = filename.rsplit('.', 1)[-1].lower()
+    if ext not in ['pdf', 'docx']:
+        return jsonify({"error": "Unsupported file type"}), 400
+
     try:
         username = session.get('username', 'unknown')
         with tempfile.TemporaryDirectory() as tmp_dir:
-            save_path=os.path.join(tmp_dir,f_name)
-            request.files['file'].save(save_path)
-            
-            res,msg=process_doc(save_path, doc_type, username)
-        
-        if not res:
+            save_path = os.path.join(tmp_dir, filename)
+            file.save(save_path)
+            result, msg = process_doc(save_path, ext, username)
+
+        if not result:
             app_logger.warning(f'Document processing failed for {username}: {msg}')
-            flash("Couldn't process document","error")
             raise Exception(msg)
-        
-        app_logger.info(f'Document uploaded successfully by {username}: {f_name}')
+
+        app_logger.info(f'Document uploaded successfully by {username}: {filename}')
         flash("Successfully processed the document!", "success")
-        return jsonify({"message":"Document processed"}),201
-        
+        return jsonify({"message": "Document processed"}), 201
+
     except Exception as e:
         app_logger.error(f'Error uploading document for {username}: {str(e)}')
-        flash("Error while uploading document")
-        return jsonify({"error":"Upload failed"}),500
+        return jsonify({"error": "Upload failed"}), 500
+
+
+# ====================================================================
+# 💬 CHAT SYSTEM
+# ====================================================================
 
 @schedule_bp.route("/api/chat/save-message", methods=['POST'])
-@login_check #added to ensure only logged-in users can save messages
+@login_check
 def save_message():
-    """Save a user message to chat history without generating a response."""
+    """Save a user message without AI response."""
     data = request.get_json() or {}
     message = (data.get('message', '') or '').strip()
-    
+
     if not message:
         return jsonify({"error": "Message is required"}), 400
-    
-    # Save to session storage
+
     session_id = session.get("username", "anon")
-    if session_id not in chats:
-        chats[session_id] = []
-    
-    # Append message
+    chats.setdefault(session_id, [])
+
     chats[session_id].append({
-        'timestamp': datetime.now().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'user_message': message[:500],
-        'bot_response': None  # No response yet
+        'bot_response': None
     })
-    
-    if len(chats[session_id]) > 50:
-        chats[session_id] = chats[session_id][-50:]
-    
+
+    # Keep latest 50 messages
+    chats[session_id] = chats[session_id][-50:]
     return jsonify({"status": "saved"}), 200
 
 
-@schedule_bp.route("//api/chat/message",methods=['POST'])
+@schedule_bp.route("/api/chat/message", methods=['POST'])
+@login_check
 def chat():
-    data=request.get_json() or {}
-    message=(data.get('message','') or '').strip()
-    intent = data.get('intent', 'chat')  # 'chat' or 'schedule_prep'
-    
+    """Handle user chat messages with AI responses."""
+    data = request.get_json() or {}
+    message = (data.get('message', '') or '').strip()
+    intent = data.get('intent', 'chat')
+
     if not message:
-        return jsonify({"error":"Message is required"}),400
+        return jsonify({"error": "Message is required"}), 400
 
     try:
-        # Get existing schedules for context
-        schedule_context = ""
+        # Context summary of latest schedules
+        context_summary = ""
         if schedules:
-            schedule_list = []
-            for s in schedules[-5:]:  # Last 5 schedules
-                tasks_summary = ", ".join([t.get('title', '') for t in s.get('tasks', [])[:3]])
-                schedule_list.append(f"- {s.get('title', 'Untitled')}: {tasks_summary}")
-            schedule_context = ("\n\n###Recent Schedules\n"+ "\n".join([f"{i+1}. **{s.get('title', 'Untitled')}** — {', '.join([t.get('title', '') for t in s.get('tasks', [])[:3]]) or 'No tasks listed'}"for i, s in enumerate(schedules[-5:])]))
+            recent = schedules[-5:]
+            lines = [f"- {s.get('title', 'Untitled')} ({len(s.get('tasks', []))} tasks)" for s in recent]
+            context_summary = "\nRecent schedules:\n" + "\n".join(lines)
 
-        
-        # Create schedule-aware prompt based on intent
+        # Dynamic prompt
         if intent == 'schedule_prep':
-            # Preparing to generate a schedule, provide a warm, personalized acknowledgment
-            enhanced_message = (
-                f"You are a friendly and proactive AI schedule assistant. The user said: '{message}'.\n"
-                "Reply with a brief, encouraging acknowledgment (1-2 sentences) that shows you understand their goal. "
-                "Let them know you're ready to help and will use this info when they generate their schedule."
-            )
+            prompt = f"""You are a friendly AI scheduling assistant.
+The user said: "{message}"
+Acknowledge briefly (1-2 sentences) and mention you'll use this info when creating their schedule."""
         else:
-            # Regular chat interaction
-            enhanced_message = (
-                f"You are a friendly and proactive AI schedule assistant. The user asked: '{message}'.\n"
-                f"{schedule_context}\n"
-                "Respond with a concise, helpful answer. If the user mentions scheduling, gently remind them about the 'Generate Schedule' button for a personalized plan. "
-                "Be conversational, supportive, and personalize your response if possible."
-            )
-        
-        # Use streaming for faster response (if supported)
-        response=llm.invoke(enhanced_message).content or ""
-        response_str=str(response).strip()
-        
-        # Simple response without suggestions
-        llm_response = {
-            "message": response_str
-        }
-        
+            prompt = f"""You are a helpful AI schedule assistant.
+User asked: "{message}"
+{context_summary}
+
+Respond concisely. If it's about planning, remind them they can click 'Generate Schedule'."""
+
+        llm_response = llm.invoke(prompt)
+        reply = str(getattr(llm_response, 'content', llm_response)).strip()
+
+        response = {"message": reply}
+
     except Exception as e:
-        print(f"Chat error: {e}")
-        # Fallback to simple response if LLM fails
+        app_logger.error(f"Chat error: {e}")
+        response = {"message": "I'm your AI scheduling assistant! I can help you plan, organize, and stay productive."}
 
-        llm_response = {
-            "message":(
-                "Sorry, I was unable to process your request right now due to a technical issue."
-                "You can still ask me about schedules, tasks, or productivity tips! If this keeps happening, please try again later."
-            ),
-            "error": True
-        }
-    
-    # Optimize session storage
-    session_id=session.get("username","anon") 
-    if session_id not in chats:
-        chats[session_id]=[]
-    
-    # Keep only last 50 messages to prevent memory bloat
+    # Save chat
+    session_id = session.get("username", "anon")
+    chats.setdefault(session_id, [])
     chats[session_id].append({
-        'timestamp': datetime.now().isoformat(),
-        'user_message': message if len(message) <= 500 else message[:500], #Only limit if needed
-        'bot_response': llm_response
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'user_message': message[:500],
+        'bot_response': response
     })
-    
-    if len(chats[session_id]) > 50:
-        chats[session_id] = chats[session_id][-50:]
-    
-    return jsonify(llm_response)
+    chats[session_id] = chats[session_id][-50:]
+
+    return jsonify(response)
 
 
-@schedule_bp.route("/api/generate",methods=['POST'])
+@schedule_bp.route("/api/chat/history", methods=['GET'])
+@login_check
+def chat_history():
+    """Return recent chat history for the logged-in user."""
+    session_id = session.get("username", "anon")
+    return jsonify(chats.get(session_id, []))
+
+
+@schedule_bp.route("/api/chat/clear-history", methods=['POST'])
+@login_check
+def clear_chat_history():
+    """Clear chat history for the user."""
+    session_id = session.get("username", "anon")
+    chats[session_id] = []
+    return jsonify({"message": "Chat history cleared"})
+
+
+# ====================================================================
+# 🗓️ SCHEDULE GENERATION & MANAGEMENT
+# ====================================================================
+
+@schedule_bp.route("/api/generate", methods=['POST'])
+@login_check
 def generate_schedule():
-    message=request.get_json() or {}
-    user_input=(message.get('input','') or '').strip()
-    title=message.get('title','AI Generated Schedule') or 'AI Generated Schedule'
-    description=message.get('description','') or ''
-    
+    """Generate a new AI schedule from user input."""
+    payload = request.get_json() or {}
+    user_input = (payload.get('input', '') or '').strip()
+    title = (payload.get('title', 'AI Generated Schedule') or '').strip()
+    description = (payload.get('description', '') or '').strip()
+
     if not user_input:
         return jsonify({"error": "Input is required"}), 400
-    
+
     try:
         username = session.get('username', 'unknown')
-        context,_analysis=get_context(user_input)
-        schedule=process_schedule(user_input,context)
-        # feat: enriched for frontend list
-        schedule_obj={
-            **schedule,
-              "id": f"sch-{len(schedules)+1}",
-              "title": (title if title.strip() else schedule.get("title", "AI Generated Schedule")),
-              "description": (description if description.strip() else schedule.get("description", "")),
-              "created_at": datetime.now(datetime.timezone.utc).isoformat(),
-              "created_by": username,
-              "status": "active"
-        }
-        
-        schedules.append(schedule_obj)
-        app_logger.info(f'Schedule generated for {username}: {title}')
-        return jsonify(schedule_obj), 201
-    
-    except Exception as e:
-        app_logger.error(f'Error generating schedule: {str(e)}')
-        return jsonify({"error": "Failed to generate schedule"}), 500
-
-
-@schedule_bp.route('/api/schedules',methods=['GET'])
-def list_schedules():
-    return jsonify(schedules)
-
-@schedule_bp.route('/api/schedules/<sid>', methods=['GET'])
-def get_schedule(sid):
-    if not sid:
-        return jsonify({"error": "Schedule ID is required"}), 400
-    try:
-        schedule_item = next((s for s in schedules if s.get('id') == sid), None)
-        if schedule_item:
-            return jsonify(schedule_item), 200
-        else:
-            return jsonify({"error": f"Schedule with ID '{sid}' not found"}), 404
-    except Exception as e:
-        app_logger.error(f"Error fetching schedule {sid}: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-
-@schedule_bp.route('/api/generate-from-chat', methods=['POST'])
-def generate_from_chat():
-    """Generate a schedule using the latest chat message from the current session."""
-    session_id = session.get("username", "anon")
-    history = chats.get(session_id, [])
-    latest_message = None
-    for m in reversed(history):
-        text = (m.get('user_message', '') or '').strip()
-        if text:
-            latest_message = text
-            break
-
-    if not latest_message:
-        return jsonify({"error": "No recent chat message found. Send a message in the dashboard chat first."}), 400
-
-    payload = request.get_json(silent=True) or {}
-    title = (payload.get('title') or '').strip() or 'AI Generated Schedule'
-    description = (payload.get('description') or '').strip()
-
-    try:
-        print(f"\n=== SCHEDULE GENERATION DEBUG ===")
-        print(f"User query: {latest_message}")
-        context, _analysis = get_context(latest_message)
-        print(f"Context retrieved (length): {len(context) if context else 0}")
-        print(f"Context preview: {context[:200] if context else 'EMPTY CONTEXT'}...")
-        schedule = process_schedule(latest_message, context)
-        print(f"Schedule generated: {json.dumps(schedule, indent=2)}")
-        print(f"=== END DEBUG ===")
+        context, _ = get_context(user_input)
+        schedule = process_schedule(user_input, context)
 
         schedule_obj = {
             **schedule,
-            "id": f"sch-{len(schedules)+1}",
+            "id": f"sch-{len(schedules) + 1}",
             "title": title or schedule.get("title", "AI Generated Schedule"),
             "description": description or schedule.get("description", ""),
-            "created_at": datetime.now().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_by": username,
+            "status": "active"
+        }
+
+        schedules.append(schedule_obj)
+        app_logger.info(f"Schedule generated for {username}: {title}")
+        return jsonify(schedule_obj), 201
+
+    except Exception as e:
+        app_logger.error(f"Error generating schedule: {str(e)}")
+        return jsonify({"error": "Failed to generate schedule"}), 500
+
+
+@schedule_bp.route("/api/schedules", methods=['GET'])
+@login_check
+def list_schedules():
+    """List all schedules."""
+    return jsonify(schedules)
+
+
+@schedule_bp.route("/api/schedules/<sid>", methods=['GET', 'DELETE'])
+@login_check
+def handle_schedule(sid):
+    """Get or delete a schedule by ID."""
+    global schedules
+    if request.method == 'GET':
+        for s in schedules:
+            if s.get('id') == sid:
+                return jsonify(s)
+        return jsonify({"error": "Not found"}), 404
+
+    # DELETE
+    before = len(schedules)
+    schedules = [s for s in schedules if s.get('id') != sid]
+    if len(schedules) == before:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify({"message": "Deleted successfully"})
+
+
+@schedule_bp.route("/api/generate-from-chat", methods=['POST'])
+@login_check
+def generate_from_chat():
+    """Generate a schedule using the latest chat message."""
+    session_id = session.get("username", "anon")
+    history = chats.get(session_id, [])
+    latest_message = next((m.get('user_message') for m in reversed(history) if m.get('user_message')), None)
+
+    if not latest_message:
+        return jsonify({"error": "No recent chat message found. Try chatting first!"}), 400
+
+    payload = request.get_json(silent=True) or {}
+    title = (payload.get('title') or 'AI Generated Schedule').strip()
+    description = (payload.get('description') or '').strip()
+
+    try:
+        app_logger.debug(f"Generating from chat for {session_id}: {latest_message}")
+        context, _ = get_context(latest_message)
+        schedule = process_schedule(latest_message, context)
+
+        schedule_obj = {
+            **schedule,
+            "id": f"sch-{len(schedules) + 1}",
+            "title": title or schedule.get("title", "AI Generated Schedule"),
+            "description": description or schedule.get("description", ""),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_by": session_id,
             "status": "active"
         }
 
         schedules.append(schedule_obj)
         return jsonify(schedule_obj), 201
+
     except Exception as e:
-        print(f"Error while generating schedule from chat {e}")
+        app_logger.error(f"Error generating schedule from chat: {e}")
         return jsonify({"error": "Failed to generate schedule from chat"}), 500
-
-@schedule_bp.route('/api/chat/history',methods=['GET'])
-def chat_history():
-    session_id=session.get("username","anon")
-    return jsonify(chats.get(session_id,[]))
-
-@schedule_bp.route('/api/chat/clear-history',methods=['POST'])
-def clear_chat_history():
-    session_id=session.get("username","anon")
-    chats[session_id]=[]
-    return jsonify({
-    "type": "success",
-    "title": "Session Cleared",
-    "message": "Your data has been reset successfully!"}), 200
-
-@schedule_bp.route('/api/chat/schedules',methods=['GET'])
-def chat_schedules():
-    return jsonify(schedules)
-
-@schedule_bp.route('/api/schedules/<sid>',methods=['DELETE'])
-def delete_schedule(sid):
-    global schedules
-    before=len(schedules)
-    schedules=[s for s in schedules if s.get('id')!=sid]
-    if len(schedules)==before:
-        return jsonify({"error":"Not found"}),404
-    return jsonify({"message":"deleted"})
