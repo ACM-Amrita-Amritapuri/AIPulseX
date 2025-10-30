@@ -46,7 +46,7 @@ async def generate_story(prompt):
         text = ''.join([i for i in text if i not in string.punctuation])
         text = text.encode('utf8').decode('ascii', 'ignore')
         return text
-    
+        
     next_words=60
     # Generate the next sequence of words
     for _ in range(next_words):
