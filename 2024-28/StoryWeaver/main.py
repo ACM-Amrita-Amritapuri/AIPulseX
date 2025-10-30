@@ -35,112 +35,53 @@ with open(TOKENIZER_NAME,'rb') as f:
 
 print(f"Model loaded with max sequence length: {max_sequence_length}")
 
-'''Creating the function to process the given text and generate the story'''
+# Build reverse index for faster word lookup
+index_to_word = {index: word for word, index in tokenizer.word_index.items()}
 
-# Creating the story generation function
+def clean_data(text):
+    """Preprocess text by lowercasing, removing punctuation, and handling encoding."""
+    text = str(text).lower()
+    text = ''.join([char for char in text if char not in string.punctuation])
+    text = text.encode('utf8').decode('ascii', 'ignore')
+    return text
 
-async def generate_story(prompt):
+def generate_story(prompt, next_words=50, temperature=0.7, max_words=100):
+    """Generate story continuation from prompt using the trained model."""
     
-    def clean_data(text):
-        text = str(text).lower()
-        text = ''.join([i for i in text if i not in string.punctuation])
-        text = text.encode('utf8').decode('ascii', 'ignore')
-        return text
-    
-    next_words=50
-    # Generate the next sequence of words
-    for _ in range(next_words):
-         # Step 1: Convert the current text into token sequences
-         # The 'clean_data' function preprocesses the text (lowercase, remove punctuation, etc.)
-        tokens = tokenizer.texts_to_sequences([clean_data(text=prompt)])[0]
-        # If no valid tokens are found (e.g., text is empty or contains unknown words), stop generation
-        if not tokens:
-            break
-        # Step 2: Keep only the last (max_sequence_length - 1) tokens
-        # This ensures the input sequence length matches the model’s expected input size
-        tokens = tokens[-(max_sequence_length - 1):]
-        # Step 3: Pad the sequence so it has a uniform length for the model
-        # Padding is added to the left ('pre') if the sequence is shorter than the required length
-        tokens = pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
-        # Step 4: Predict the next word probabilities using the trained model
-        prediction = model.predict(tokens, verbose=0)
-        # Step 5: Apply temperature scaling to control randomness
-        # A lower temperature (<1) makes predictions more deterministic
-        # A higher temperature (>1) makes them more random and creative
-        # Add randomness by using temperature sampling
-        temperature = 0.7
-        prediction = prediction[0] / temperature
-        prediction = np.exp(prediction) / np.sum(np.exp(prediction))
-        # Step 6: Randomly sample the next word index based on the probability distribution
-        # This avoids always picking the most probable word (adds natural variation)
-        # Sample from the distribution instead of taking max
-        predicted_index = np.random.choice(len(prediction), p=prediction)
-        # Initialize an empty string to hold the predicted output word
-
-    # Ensure prompt is not empty
     if not prompt or not prompt.strip():
         return "Error: Empty prompt provided."
-
-    next_words = 50
+    
     for _ in range(next_words):
-        # Clean the prompt and convert to token sequence
-        cleaned_prompt = clean_data(text=prompt)
-        tokens = tokenizer.texts_to_sequences([cleaned_prompt])[0]  # Fixed line 52
-
-        # Check if tokens are empty
+        cleaned_prompt = clean_data(prompt)
+        tokens = tokenizer.texts_to_sequences([cleaned_prompt])[0]
+        
         if not tokens:
-            return prompt.title()  # Return current prompt if tokenization fails
-
-        # Truncate to max_sequence_length - 1 to leave room for prediction
-        tokens = tokens[-(max_sequence_length-1):]
+            break
+        
+        tokens = tokens[-(max_sequence_length - 1):]
         tokens = pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
-
-        # Predict next word probabilities
-        prediction = model.predict(tokens, verbose=0)
-
-        # Add randomness with temperature sampling
-        prediction = prediction[0] / 0.7  # Temperature
-        prediction = np.exp(prediction) / np.sum(np.exp(prediction))
-
-        # Sample from the distribution
+        
+        prediction = model.predict(tokens, verbose=0)[0]
+        prediction = np.exp(prediction / temperature) / np.sum(np.exp(prediction / temperature))
+        
         predicted_index = np.random.choice(len(prediction), p=prediction)
-
-        # Convert index to word
-        output = ""
-        # Step 7: Convert the predicted index back into the actual word
-        # The tokenizer contains a mapping of words to their integer indices (word_index)
-        # We iterate through this dictionary to find which word corresponds to the predicted index
-
-        for word, index in tokenizer.word_index.items():
-            if index == predicted_index:
-                output = word  # Found the word corresponding to the predicted index
-                break  # Stop searching once we find the match
-        # Step 8: If a valid word was found from the prediction
-                output = word
-                break
-
-        # Append predicted word to prompt
+        output = index_to_word.get(predicted_index, "")
+        
         if output:
-            # Append the predicted word to the current prompt
             prompt += ' ' + output
-            # Step 9: Add stopping conditions to prevent runaway text generation
-            # The model stops generating further if:
-            #   - The predicted word is an end punctuation ('.', '!', '?')
-            #   - OR the total word count in the prompt exceeds 100 words
-            # Stop if we get punctuation or very long text
-
-            # Stop if punctuation or max length reached
-            if output in ['.', '!', '?'] or len(prompt.split()) > 100:
+            if output in ['.', '!', '?'] or len(prompt.split()) > max_words:
                 break
         else:
             break
-
+    
     return prompt.title()
 
 def handler(prompt):
-    # WRONG: nested asyncio.run may explode in notebooks/ASGI
-    result = asyncio.run(generate_story(prompt))
-    return result
+    """Lightweight wrapper around generate_story with basic validation."""
+    text = (prompt or "").strip()
+    if not text:
+        return "Error: Empty prompt provided."
+    return generate_story(text)
 
 '''Creating the main flask app''' 
 
