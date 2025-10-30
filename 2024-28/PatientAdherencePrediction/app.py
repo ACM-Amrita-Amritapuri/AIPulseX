@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
+import pandas as _pd
+import pandas as _pd
 model = joblib.load("best_model.pkl")
 
 st.title("💊 Patient Medication Adherence Prediction App")
@@ -47,23 +49,86 @@ if hasattr(model, "feature_names_in_"):
 
 if st.button("Predict"):
     try:
-        # Make prediction and get probability scores
-        prediction = model.predict(input_df)[0]
-        
-        if hasattr(model, "predict_proba"):
-            probability = model.predict_proba(input_df)[0]
-        else:
-            probability = [None, None]
+        with st.spinner("Running prediction..."):
+            # Make prediction
+            prediction = model.predict(input_df)[0]
 
-        # Display prediction result with probability
+            # Get probability scores (with sensible fallbacks)
+            probability = None
+            if hasattr(model, "predict_proba"):
+                probability = model.predict_proba(input_df)[0]
+            elif hasattr(model, "decision_function"):
+                scores = model.decision_function(input_df)
+                # helper transforms #type: ignore
+                def _sigmoid(x):
+                    return 1.0 / (1.0 + np.exp(-x)) #type: ignore
+                def _softmax(x):
+                    e = np.exp(x - np.max(x))
+                    return e / e.sum() #type: ignore
+                if np.ndim(scores) == 1: #type: ignore 
+                    p_pos = float(_sigmoid(scores[0]))
+                    probability = [1.0 - p_pos, p_pos]
+                else:
+                    probability = _softmax(scores[0])
+            else:
+                # no probability info available
+                probability = [None, None]
+
+        # small formatting helper
+        def _fmt(p):
+            return f"{p * 100:.1f}%" if p is not None else "N/A"
+
+        # Display main result
         if prediction == 1:
-            st.success(f"✅ Patient is likely to ADHERE ({probability[1] * 100:.1f}% confidence)")
+            st.success(f" Patient is likely to ADHERE ({_fmt(probability[1])} confidence)")
         else:
-            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0] * 100:.1f}% confidence)")
+            st.error(f" Patient is likely to NOT ADHERE ({_fmt(probability[0])} confidence)")
 
+        # Confidence breakdown
         st.write("### Confidence Scores")
-        st.write(f"- Adherence: {probability[1]*100:.1f}%")
-        st.write(f"- Non-adherence: {probability[0]*100:.1f}%")
+        st.write(f"- Adherence: {_fmt(probability[1])}")
+        st.write(f"- Non-adherence: {_fmt(probability[0])}")
+
+        # Visual progress bars (if probabilities available)
+        if probability[0] is not None and probability[1] is not None:
+            cols = st.columns(2)
+            cols[0].write("Non-adherence")
+            cols[0].progress(min(max(int(probability[0] * 100), 0), 100)) #type: ignore
+            cols[1].write("Adherence")
+            cols[1].progress(min(max(int(probability[1] * 100), 0), 100)) #type: ignore
+
+        # Show input summary for transparency
+        st.write("### Input Summary")
+        st.table(input_df.T.rename(columns={0: "Value"}))
+
+        # Try to show feature importances / coefficients if available
+        try:
+            if hasattr(model, "feature_importances_"):
+                imp = _pd.Series(model.feature_importances_, index=input_df.columns)
+                imp = imp.sort_values(ascending=False).head(10)
+                st.write("### Top features (feature_importances_)")
+                st.bar_chart(imp)
+            elif hasattr(model, "coef_"):
+                coef = model.coef_
+                if np.ndim(coef) > 1:
+                    coef_vals = np.abs(coef[0])
+                else:
+                    coef_vals = np.abs(coef)
+                imp = _pd.Series(coef_vals, index=input_df.columns).sort_values(ascending=False).head(10)
+                st.write("### Top features (absolute coefficients)")
+                st.bar_chart(imp)
+        except Exception:
+            # non-fatal if feature importance cannot be displayed
+            pass
+
+        # Prepare downloadable result
+        result = input_df.copy()
+        result["prediction"] = int(prediction)
+        result["prob_non_adherence"] = float(probability[0]) if probability[0] is not None else None #type: ignore
+        result["prob_adherence"] = float(probability[1]) if probability[1] is not None else None #type: ignore
+        csv = result.to_csv(index=False).encode("utf-8")
+        st.download_button("Download prediction (CSV)", csv, file_name="prediction_result.csv", mime="text/csv")
 
     except Exception as e:
-        st.error(f"⚠️ Prediction failed: {str(e)}")
+        st.error(" Prediction failed")
+        st.exception(e)
