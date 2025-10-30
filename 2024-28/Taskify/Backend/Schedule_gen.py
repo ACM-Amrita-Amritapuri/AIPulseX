@@ -122,7 +122,6 @@ def chat():
         # Context summary of latest schedules
         context_summary = ""
         if schedules:
-<<<<<<< HEAD
             recent = schedules[-5:]
             lines = [f"- {s.get('title', 'Untitled')} ({len(s.get('tasks', []))} tasks)" for s in recent]
             context_summary = "\nRecent schedules:\n" + "\n".join(lines)
@@ -155,63 +154,6 @@ Respond concisely. If it's about planning, remind them they can click 'Generate 
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'user_message': message[:500],
         'bot_response': response
-=======
-            schedule_list = []
-            for s in schedules[-5:]:  # Last 5 schedules
-                tasks_summary = ", ".join([t.get('title', '') for t in s.get('tasks', [])[:3]])
-                schedule_list.append(f"- {s.get('title', 'Untitled')}: {tasks_summary}")
-            schedule_context = ("\n\n###Recent Schedules\n"+ "\n".join([f"{i+1}. **{s.get('title', 'Untitled')}** — {', '.join([t.get('title', '') for t in s.get('tasks', [])[:3]]) or 'No tasks listed'}"for i, s in enumerate(schedules[-5:])]))
-
-        
-        # Create schedule-aware prompt based on intent
-        if intent == 'schedule_prep':
-            # Preparing to generate a schedule, provide a warm, personalized acknowledgment
-            enhanced_message = (
-                f"You are a friendly and proactive AI schedule assistant. The user said: '{message}'.\n"
-                "Reply with a brief, encouraging acknowledgment (1-2 sentences) that shows you understand their goal. "
-                "Let them know you're ready to help and will use this info when they generate their schedule."
-            )
-        else:
-            # Regular chat interaction
-            enhanced_message = (
-                f"You are a friendly and proactive AI schedule assistant. The user asked: '{message}'.\n"
-                f"{schedule_context}\n"
-                "Respond with a concise, helpful answer. If the user mentions scheduling, gently remind them about the 'Generate Schedule' button for a personalized plan. "
-                "Be conversational, supportive, and personalize your response if possible."
-            )
-        
-        # Use streaming for faster response (if supported)
-        response=llm.invoke(enhanced_message).content or ""
-        response_str=str(response).strip()
-        
-        # Simple response without suggestions
-        llm_response = {
-            "message": response_str
-        }
-        
-    except Exception as e:
-        print(f"Chat error: {e}")
-        # Fallback to simple response if LLM fails
-
-        llm_response = {
-            "message":(
-                "Sorry, I was unable to process your request right now due to a technical issue."
-                "You can still ask me about schedules, tasks, or productivity tips! If this keeps happening, please try again later."
-            ),
-            "error": True
-        }
-    
-    # Optimize session storage
-    session_id=session.get("username","anon") 
-    if session_id not in chats:
-        chats[session_id]=[]
-    
-    # Keep only last 50 messages to prevent memory bloat
-    chats[session_id].append({
-        'timestamp': datetime.now().isoformat(),
-        'user_message': message if len(message) <= 500 else message[:500], #Only limit if needed
-        'bot_response': llm_response
->>>>>>> dfafec7387e27eb094ec0965b16acd6d09dc26c6
     })
     chats[session_id] = chats[session_id][-50:]
 
@@ -337,33 +279,3 @@ def generate_from_chat():
     except Exception as e:
         app_logger.error(f"Error generating schedule from chat: {e}")
         return jsonify({"error": "Failed to generate schedule from chat"}), 500
-<<<<<<< HEAD
-=======
-
-@schedule_bp.route('/api/chat/history',methods=['GET'])
-def chat_history():
-    session_id=session.get("username","anon")
-    return jsonify(chats.get(session_id,[]))
-
-@schedule_bp.route('/api/chat/clear-history',methods=['POST'])
-def clear_chat_history():
-    session_id=session.get("username","anon")
-    chats[session_id]=[]
-    return jsonify({
-    "type": "success",
-    "title": "Session Cleared",
-    "message": "Your data has been reset successfully!"}), 200
-
-@schedule_bp.route('/api/chat/schedules',methods=['GET'])
-def chat_schedules():
-    return jsonify(schedules)
-
-@schedule_bp.route('/api/schedules/<sid>',methods=['DELETE'])
-def delete_schedule(sid):
-    global schedules
-    before=len(schedules)
-    schedules=[s for s in schedules if s.get('id')!=sid]
-    if len(schedules)==before:
-        return jsonify({"error":"Not found"}),404
-    return jsonify({"message":"deleted"})
->>>>>>> dfafec7387e27eb094ec0965b16acd6d09dc26c6

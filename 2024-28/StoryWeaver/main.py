@@ -50,11 +50,44 @@ async def generate_story(prompt):
         text = ''.join([i for i in text if i not in string.punctuation])
         text = text.encode('utf8').decode('ascii', 'ignore')
         return text
+<<<<<<< HEAD
+=======
+        
+    next_words=60
+    # Generate the next sequence of words
+    for _ in range(next_words):
+         # Step 1: Convert the current text into token sequences
+         # The 'clean_data' function preprocesses the text (lowercase, remove punctuation, etc.)
+        tokens = tokenizer.texts_to_sequences([clean_data(text=prompt)])[0]
+        # If no valid tokens are found (e.g., text is empty or contains unknown words), stop generation
+        if not tokens:
+            break
+        # Step 2: Keep only the last (max_sequence_length - 1) tokens
+        # This ensures the input sequence length matches the model’s expected input size
+        tokens = tokens[-(max_sequence_length - 1):]
+        # Step 3: Pad the sequence so it has a uniform length for the model
+        # Padding is added to the left ('pre') if the sequence is shorter than the required length
+        tokens = pad_sequences([tokens], maxlen=max_sequence_length, padding='pre')
+        # Step 4: Predict the next word probabilities using the trained model
+        prediction = model.predict(tokens, verbose=0)
+        # Step 5: Apply temperature scaling to control randomness
+        # A lower temperature (<1) makes predictions more deterministic
+        # A higher temperature (>1) makes them more random and creative
+        # Add randomness by using temperature sampling
+        temperature = 0.7
+        prediction = prediction[0] / temperature
+        prediction = np.exp(prediction) / np.sum(np.exp(prediction))
+        # Step 6: Randomly sample the next word index based on the probability distribution
+        # This avoids always picking the most probable word (adds natural variation)
+        # Sample from the distribution instead of taking max
+        predicted_index = np.random.choice(len(prediction), p=prediction)
+        # Initialize an empty string to hold the predicted output word
+>>>>>>> a3b16bb731301e3d9026e556fc9c3f616b0b714f
 
     if not prompt or not prompt.strip():
         return "Error: Empty prompt provided."
-
-    next_words = 50
+    text = prompt
+    next_words = 60
     for _ in range(next_words):
         cleaned_prompt = clean_data(prompt)
         tokens = tokenizer.texts_to_sequences([cleaned_prompt])[0]
@@ -76,7 +109,12 @@ async def generate_story(prompt):
             if index == predicted_index:
                 output = word
                 break
+<<<<<<< HEAD
 
+=======
+        return text
+        # Append predicted word to prompt
+>>>>>>> a3b16bb731301e3d9026e556fc9c3f616b0b714f
         if output:
             prompt += ' ' + output
             if output in ['.', '!', '?'] or len(prompt.split()) > 100:
