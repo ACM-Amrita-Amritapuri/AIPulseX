@@ -10,51 +10,123 @@ st.markdown(
     """
     <style>
     .stApp {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); /* Cinematic gradient */
-        color: #FFD700; /* Gold text */
-        font-family: 'Arial', sans-serif;
-    }
-    .stButton>button {
-        background-color: #FF4500; /* Orange-red for drama */
-        color: white;
-        border: 2px solid #FFD700;
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-size: 18px;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background-color: #FF8C00;
-        transform: scale(1.1);
-    }
-    .stTextInput>div>input, .stSelectbox>div>select {
-        background-color: rgba(255, 255, 255, 0.9);
-        color: #000000;
-        border: 2px solid #FFD700;
-        border-radius: 5px;
-    }
-    .stSuccess {
-        background-color: #228B22; /* Forest green for success */
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .stError {
-        background-color: #B22222; /* Firebrick for errors */
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .header-icon {
-        font-size: 40px;
-        margin-right: 10px;
-        text-align: center;
-    }
-    .sub-header {
-        font-size: 25px;
-        margin-right: 10px;
-        text-align: center;
-    }
+    background: linear-gradient(135deg, #0a0f1f 0%, #16213e 40%, #1c3879 100%);
+    color: #FFD700; /* Gold text */
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    letter-spacing: 0.6px;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+    background-attachment: fixed;
+    padding: 10px;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+/* ====== BACKGROUND LIGHT EFFECTS ====== */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 25% 20%, rgba(255, 215, 0, 0.08), transparent 60%),
+                radial-gradient(circle at 75% 80%, rgba(255, 255, 255, 0.05), transparent 70%);
+    z-index: -1;
+}
+
+/* ====== BUTTON STYLING ====== */
+.stButton>button {
+    background: linear-gradient(90deg, #b8860b, #ffd700);
+    color: #0f1a2e;
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.stButton>button:hover {
+    background: linear-gradient(90deg, #ffd700, #ffcc00);
+    transform: scale(1.07);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+/* ====== INPUT FIELDS ====== */
+.stTextInput>div>input, .stSelectbox>div>select {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #000000;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+    transition: 0.3s ease;
+}
+
+.stTextInput>div>input:focus, .stSelectbox>div>select:focus {
+    border-color: #ffdf00;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+/* ====== STATUS BOXES ====== */
+.stSuccess {
+    background: linear-gradient(90deg, #228B22, #32CD32);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(50, 205, 50, 0.4);
+}
+
+.stError {
+    background: linear-gradient(90deg, #B22222, #DC143C);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(220, 20, 60, 0.4);
+}
+
+/* ====== HEADINGS ====== */
+.header-icon {
+    font-size: 42px;
+    margin-top: 15px;
+    text-align: center;
+    color: #FFD700;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    animation: pulse 3s infinite alternate;
+}
+
+.sub-header {
+    font-size: 26px;
+    text-align: center;
+    color: #FFE55C;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #FFD700, #b58b00);
+    border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+    background: #0a0f1f;
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    from { text-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+    to { text-shadow: 0 0 18px rgba(255, 215, 0, 0.8); }
+}
     </style>
     """,
     unsafe_allow_html=True
@@ -172,9 +244,18 @@ training_columns = ["budget", "runtime"] + genre_columns + season_columns
 features = features.reindex(columns=training_columns, fill_value=0)
 
 # Get model’s expected feature names if available
+
 if hasattr(model, "feature_names_in_"):
     expected_features = model.feature_names_in_.tolist()
+    missing = [f for f in expected_features if f not in features.columns]
+    extra = [f for f in features.columns if f not in expected_features]
+
+    for col in missing:
+        features[col] = 0
     features = features.reindex(columns=expected_features, fill_value=0)
+
+    if missing or extra:
+        st.info(f"Auto-aligned features — {len(missing)} added, {len(extra)} ignored.")
 else:
     # Improved feature mismatch handling
     expected_features = 23
@@ -207,14 +288,19 @@ if st.button("🎇 Unveil the Destiny!"):
         result = "HIT" if prediction == 1 else "FLOP"
         st.success(f"🏆 Prediction: {result} 🏆\nLights, camera, action! Your movie's fate is sealed! 🎥")
         st.write(f"🌟 Probability of Success: {probability:.2%} 🌟 - The box office whispers its verdict!")
+    except ValueError as ve:
+        if "feature" in str(ve).lower() or "shape" in str(ve).lower():
+            st.error("Feature mismatch! Please check your input values and ensure all required features are present.")
+            st.write("Input features shape:", features.shape)
+            st.write("Feature names:", ", ".join(features.columns))
+        else:
+            st.error(f"⚠️ Oops! Magic failed: {str(ve)} ⚠️")
     except Exception as e:
-        st.error(f"⚠️ Oops! Magic failed: {str(e)} ⚠️\nCheck the spellbook (features) for errors!")
-        st.write("Input features shape:", features.shape)
-        st.write("Feature names:", ", ".join(features.columns))
+        st.error("An unexpected error occurred. Please try again or check your input.")
+        st.write("Technical details:", str(e))
 
 @app.route("/predict", methods=["GET"])
 def predict():
     values = [float(x) for x in request.form.values()]
     pred = model.predict(np.array(values))
     return pred
-

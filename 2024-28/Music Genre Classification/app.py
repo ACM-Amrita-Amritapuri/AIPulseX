@@ -1,10 +1,11 @@
-import streamlit as st 
-import tensorflow as tf 
-import librosa # type: ignore
-import numpy as np 
-import os 
-import matplotlib.pyplot as plt 
+import streamlit as st
+import tensorflow as tf
+import librosa  # type: ignore
+import numpy as np
+import os
+import matplotlib.pyplot as plt
 import tempfile
+import pandas as pd
 
 class_names = ['blues', 'classical', 'country', 'disco', 'hiphop','jazz', 'metal', 'pop', 'reggae', 'rock']
 # Creating functions to preprocess audio files and load model
@@ -21,31 +22,45 @@ def preprocess_file(file_path,n_mfcc=40,max_len=1300):
         mfcc=np.expand_dims(mfcc,axis=0)
         return mfcc 
     except Exception as e:
-        return None 
+        st.error(f"Error processing audio file: {e}")
+        return None, None
 
 @st.cache_resource
 def load_trained_model():
-    return tf.keras.models.load_model("Model.keras")
-model=load_trained_model()
-# MAIN 
-st.set_page_config(page_title="Music Genre Classifier",layout="centered",page_icon="🎸")
-st.title("Music Genre Classification App")
-st.markdown("Upload a '.wav' audio file and get instant genre prediction")
+    """Loads the pre-trained Keras model."""
+    try:
+        model = tf.keras.models.load_model("Model.keras")
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
-if "reset" not in st.session_state:
-    st.session_state.reset = False
-def reset_app():
-    st.session_state.reset = True
-    st.session_state.file_uploader_key = str(np.random.rand())
-file=st.file_uploader("Upload a .wav file",type=["wav"])
+# Load the model
+model = load_trained_model()
 
-if file is not None:
-    st.audio(file,format="audio/wav")
-    with st.spinner("Extracting features and getting the prediction..."):
+# --- Streamlit App UI ---
+
+st.set_page_config(page_title="Music Genre Classifier", layout="centered", page_icon="🎸")
+st.title("Music Genre Classification App 🎶")
+st.markdown("Upload a `.wav` audio file and the model will predict its genre.")
+
+# File uploader
+file = st.file_uploader("Upload your .wav file", type=["wav"])
+
+if file is not None and model is not None:
+    # Display the audio player
+    st.audio(file, format="audio/wav")
+    
+    with st.spinner("Analyzing your music... 🎶"):
+        # Save to a temporary file
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(file.read())
             tmp_path = tmp_file.name
-        features=preprocess_file(tmp_path)
+
+        # Process the file
+        features, mfcc_plot_data = preprocess_file(tmp_path)
+        
+        # Remove the temporary file
         os.remove(tmp_path)
         if features is not None:
             preds=model.predict(features)[0]
@@ -60,8 +75,5 @@ if file is not None:
             ax.axis('equal')
             st.pyplot(fig)
 
-            st.button("Reset and Upload Another", on_click=reset_app)
-elif st.session_state.reset:
-    st.session_state.reset = False  
 else:
     st.warning("Please upload a WAV file to begin.")
