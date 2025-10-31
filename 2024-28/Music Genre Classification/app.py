@@ -7,35 +7,20 @@ import matplotlib.pyplot as plt
 import tempfile
 import pandas as pd
 
-# Define class names
-class_names = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
-
-# --- Preprocessing and Model Loading ---
-
-def preprocess_file(file_path, n_mfcc=40, max_len=1300):
-    """
-    Loads an audio file, computes its MFCC, and formats it
-    for the model. Also returns the raw MFCC for plotting.
-    """
+class_names = ['blues', 'classical', 'country', 'disco', 'hiphop','jazz', 'metal', 'pop', 'reggae', 'rock']
+# Creating functions to preprocess audio files and load model
+def preprocess_file(file_path,n_mfcc=40,max_len=1300):
     try:
-        y, sr = librosa.load(file_path, duration=30)
-        # Compute MFCC
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
-        
-        # Pad or truncate the MFCC
-        if mfcc.shape[1] < max_len:
-            pad_width = max_len - mfcc.shape[1]
-            mfcc_padded = np.pad(mfcc, ((0, 0), (0, pad_width)), mode='constant')
+        y,sr=librosa.load(file_path,duration=30)
+        mfcc=librosa.feature.mfcc(y=y,sr=sr,n_mfcc=n_mfcc)
+        if mfcc.shape[1] <max_len:
+                        pad_width=max_len-mfcc.shape[1]
+                        mfcc=np.pad(mfcc,((0,0),(0,pad_width)),mode='constant')
         else:
-            mfcc_padded = mfcc[:, :max_len]
-        
-        # Reshape for the model (add batch and channel dimensions)
-        mfcc_processed = mfcc_padded.reshape(n_mfcc, max_len, 1)
-        mfcc_processed = np.expand_dims(mfcc_processed, axis=0)
-        
-        # Return both the processed tensor and the plottable MFCC
-        return mfcc_processed, mfcc_padded
-        
+            mfcc=mfcc[:, :max_len]
+        mfcc=mfcc.reshape(n_mfcc,max_len,1)
+        mfcc=np.expand_dims(mfcc,axis=0)
+        return mfcc 
     except Exception as e:
         st.error(f"Error processing audio file: {e}")
         return None, None
@@ -91,29 +76,4 @@ if file is not None and model is not None:
             st.pyplot(fig)
 
 else:
-    # Landing page info
-    st.info("Please upload a WAV file to begin analysis.")
-    
-    with st.expander("How does this work?"):
-        st.markdown("""
-            <p>
-            This app uses a Deep Learning model (a Convolutional Neural Network) trained 
-            on the <b>GTZAN Dataset</b>, a standard benchmark for music genre classification.
-            </p>
-            <p>
-            When you upload a file, the app does the following:
-            <ol>
-                <li><b>Load Audio:</b> Reads the first 30 seconds of the `.wav` file.</li>
-                <li><b>Extract Features:</b> Calculates the Mel-Frequency Cepstrum (MFCC), 
-                    which represents the sound's unique timbre and texture.</li>
-                
-                <li><b>Pad/Truncate:</b> Resizes the MFCC to a fixed length (1300 frames) 
-                    so all inputs are the same size.</li>
-                <li><b>Predict:</b> Feeds this data into the trained model to get a 
-                    probability score for each of the 10 genres.</li>
-            </ol>
-            </p>
-            """, unsafe_allow_html=True)
-
-st.markdown("---")
-st.markdown("Created with Streamlit and TensorFlow.")
+    st.warning("Please upload a WAV file to begin.")
