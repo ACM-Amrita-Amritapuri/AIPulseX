@@ -54,6 +54,30 @@ class HealthResponse(BaseModel):
 INDEX_NAME = "smart-form-filler"
 vector_store = None
 
+def ensure_deps_installed():
+    if missing_packages:
+        logger.error("Missing dependencies detected: %s", "; ".join(missing_packages))
+        raise HTTPException(
+            status_code=500,
+            detail="Missing dependencies: " + "; ".join(missing_packages) + ". Install with: pip install -r requirements.txt"
+        )
+
+def _normalize_headers(http_request: Optional[Request]) -> dict:
+    headers = {}
+    if not http_request:
+        return headers
+    raw = getattr(http_request, "headers", None)
+    if not raw:
+        return headers
+    try:
+        headers = {k.lower(): v for k, v in dict(raw).items()}
+    except Exception:
+        try:
+            headers = {k.lower(): v for k, v in raw.items()}
+        except Exception:
+            headers = {}
+    return headers
+
 
 def _resolve_key(value: Optional[str], headers: dict, header_name: str, env_name: str) -> Optional[str]:
     if value and isinstance(value, str) and value.strip():
@@ -92,16 +116,28 @@ async def upload_and_process_pdfs(
         else:
             logger.info(f"🔄 Processing {len(pdfs)} PDF files")
 
-        # Enhanced pdf validation with file type check
+         # Enhanced pdf validation with file type check and robust size detection
         total_size = 0
         for pdf in pdfs:
             if not pdf.filename:
                 raise HTTPException(status_code=400, detail="Invalid PDF filename")
             if not pdf.filename.lower().endswith('.pdf'):
                 raise HTTPException(status_code=400, detail=f"Invalid file type: {pdf.filename} (must be PDF)")
-            if pdf.size == 0:
+
+            # Some UploadFile implementations might not expose size; guard against AttributeError
+            file_size = getattr(pdf, "size", None)
+            if file_size is None:
+                # best-effort: read to compute size (dangerous for very large files)
+                content = await pdf.read()
+                file_size = len(content)
+                # reset the file's internal pointer for later reuse
+                try:
+                    pdf.file.seek(0)
+                except Exception:
+                    pass
+            if file_size == 0:
                 raise HTTPException(status_code=400, detail=f"Empty file: {pdf.filename}")
-            total_size += pdf.size
+            total_size += file_size
 
         # Size validation with more informative message 
         # 50MB total limit
@@ -321,7 +357,7 @@ Return valid JSON only.
 @app.get("/status")
 async def get_status():
     return {
-        "status": "active",   # ✅ small change #3
+        "status": "active",
         "index_name": INDEX_NAME,
         "version": "1.0.0",
         "timestamp": str(datetime.now())
@@ -330,10 +366,13 @@ async def get_status():
 
 @app.get("/debug/index-stats")
 async def debug_index_stats(pinecone_key: str = None, pinecone_host: str = None):
-    if not pinecone_key:
-        raise HTTPException(status_code=400, detail="Pinecone API key required")
-
     try:
+        # Ensure dependencies before introspecting Pinecone index
+        ensure_deps_installed()
+
+        if not pinecone_key:
+            raise HTTPException(status_code=400, detail="Pinecone API key required")
+
         pc = Pinecone(api_key=pinecone_key)
         index = pc.Index(host=pinecone_host) if pinecone_host else pc.Index(INDEX_NAME)
         return index.describe_index_stats()
