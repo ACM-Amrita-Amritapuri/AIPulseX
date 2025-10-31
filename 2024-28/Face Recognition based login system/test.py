@@ -11,8 +11,6 @@ load_dotenv()
 
 
 """Constants"""
-# user_file=os.getenv("USER_FILE")
-# embedding_dir=os.getenv("EMBEDDING_DIR")
 storage_dir_env=os.getenv("STORAGE_DIR")
 base_dir=os.path.dirname(os.path.abspath(__file__))
 user_storage_dir=os.path.abspath(storage_dir_env or os.path.join(base_dir,"data"))
@@ -26,9 +24,6 @@ jwt_secret_key=os.getenv("JWT_SECRET_KEY")
 """User managemetn"""
 
 def load_users():
-    # if os.path.exists(user_file): #type: ignore 
-    #     with open(user_file,'r') as f: #type: ignore
-    #         return json.loads(f) 
 
     if not user_file:
         return {}
@@ -45,8 +40,6 @@ def load_users():
     return {}
 
 def save_users(users):
-    # with open(user_file,'w') as f: #type: ignore
-    #     json.dump(users,f,indent=4)
     if not user_file:
         return
 
@@ -54,16 +47,16 @@ def save_users(users):
     with open(user_file,'w',encoding='utf-8') as f: #type: ignore
         json.dump(users,f,indent=4)
         
-            
     
 """Image Embedding generation"""
 
-
+# Decode base64 image
 def decode_base64_image(image):
     data=base64.b64decode(image)
     arr=np.frombuffer(data,np.uint8)
     return cv2.imdecode(arr,cv2.IMREAD_COLOR) 
 
+# Get embeddings from image
 def get_embeddings(image):
     try:
         out=DeepFace.represent(img_path=image,model_name="Facenet",enforce_detection=True)
@@ -74,7 +67,11 @@ def get_embeddings(image):
         print(e)
         return None
     
-    
-def compare_embeddings(emb1,emb2,threshold=0.25):
+
+# Compare two embeddings
+def compare_embeddings(emb1,emb2,threshold=0.75):
     cos_sim=np.dot(emb1,emb2)/(norm(emb1)* norm(emb2))
-    return cos_sim > (1-threshold)
+    if cos_sim >= threshold:
+        return True
+    else:
+        return False
