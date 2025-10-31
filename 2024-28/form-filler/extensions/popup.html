@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Form Filler</title>
+  <style>
+    body {
+      width: 400px;
+      min-height: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      margin: 0 0 20px 0;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-upload-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-upload-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(238, 90, 82, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .status {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .status.success {
+      background: rgba(76, 175, 80, 0.3);
+      color: #4caf50;
+      display: block;
+    }
+    
+    .status.error {
+      background: rgba(244, 67, 54, 0.3);
+      color: #f44336;
+      display: block;
+    }
+    
+    .pdf-info {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Form Filler</h1>
+    
+    <div class="form-group">
+      <label for="geminiKey">Gemini API Key</label>
+      <input type="password" id="geminiKey" placeholder="Enter your Gemini API key">
+    </div>
+    
+    <div class="form-group">
+      <label for="groqKey">Groq API Key</label>
+      <input type="password" id="groqKey" placeholder="Enter your Groq API key">
+    </div>
+    
+    <div class="form-group">
+      <label for="pineconeKey">Pinecone API Key</label>
+      <input type="password" id="pineconeKey" placeholder="Enter your Pinecone API key">
+    </div>
+    
+    <div class="form-group">
+      <label for="pineconeEnv">Pinecone Environment</label>
+      <input type="text" id="pineconeEnv" placeholder="e.g., us-east-1" value="us-east-1">
+    </div>
+    
+    <div class="form-group">
+      <label for="pineconeHost">Pinecone Host (optional if using serverless)</label>
+      <input type="text" id="pineconeHost" placeholder="https://<index-host>.pinecone.io">
+    </div>
+    
+    <div class="form-group">
+      <label>Upload PDF Resume/Context</label>
+      <div class="file-upload">
+        <input type="file" id="pdfFile" accept=".pdf" multiple>
+        <label for="pdfFile" class="file-upload-btn">
+          📄 Choose PDF Files
+        </label>
+      </div>
+      <div id="pdfInfo" class="pdf-info" style="display: none;"></div>
+    </div>
+    
+    <button id="uploadPdfs" class="btn btn-secondary">📤 Upload & Process PDFs</button>
+    <button id="saveSettings" class="btn btn-primary">💾 Save Settings</button>
+    <button id="fillForm" class="btn btn-primary">🤖 Fill Current Form</button>
+    
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
