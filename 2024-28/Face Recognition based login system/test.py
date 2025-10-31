@@ -3,6 +3,7 @@ from deepface import DeepFace #type: ignore
 import numpy as np
 import cv2
 import os
+from pathlib import Path
 from numpy.linalg import norm
 from dotenv import load_dotenv
 import json
@@ -11,41 +12,50 @@ load_dotenv()
 
 
 """Constants"""
-storage_dir_env=os.getenv("STORAGE_DIR")
-base_dir=os.path.dirname(os.path.abspath(__file__))
-user_storage_dir=os.path.abspath(storage_dir_env or os.path.join(base_dir,"data"))
-os.makedirs(user_storage_dir,exist_ok=True)
-user_file=os.getenv("USER_FILE") or os.path.join(user_storage_dir,"users.json")
-embedding_dir=os.getenv("EMBEDDINGS_DIR") or os.getenv("EMBEDDING_DIR") or os.path.join(user_storage_dir,"embeddings")
-os.makedirs(embedding_dir,exist_ok=True)
-jwt_secret_key=os.getenv("JWT_SECRET_KEY")
+# Paths and storage
+base_dir = Path(__file__).resolve().parent
+user_storage_dir = Path(os.getenv("STORAGE_DIR") or (base_dir / "data")).resolve()
+user_storage_dir.mkdir(parents=True, exist_ok=True)
+
+user_file = os.getenv("USER_FILE") or str(user_storage_dir / "users.json")
+
+embedding_dir = os.getenv("EMBEDDINGS_DIR") or os.getenv("EMBEDDING_DIR") or str(user_storage_dir / "embeddings")
+Path(embedding_dir).mkdir(parents=True, exist_ok=True)
+
+jwt_secret_key = os.getenv("JWT_SECRET_KEY")
 
 
-"""User managemetn"""
+"""User management"""
 
 def load_users():
-
+    """Load users JSON safely. Returns an empty dict on any error."""
     if not user_file:
         return {}
 
-    if not os.path.exists(user_file):
+    path = Path(user_file)
+    if not path.exists() or path.stat().st_size == 0:
         return {}
 
-    with open(user_file,'r',encoding='utf-8') as f: #type: ignore
-        try:
+    try:
+        with path.open('r', encoding='utf-8') as f:
             return json.load(f)
-        except json.JSONDecodeError:
-            return {}
-    
-    return {}
+    except json.JSONDecodeError:
+        return {}
+    except Exception:
+        return {}
 
 def save_users(users):
+    """Persist users JSON safely. Creates parent dirs if needed and ignores IO errors."""
     if not user_file:
         return
 
-    os.makedirs(os.path.dirname(user_file),exist_ok=True)
-    with open(user_file,'w',encoding='utf-8') as f: #type: ignore
-        json.dump(users,f,indent=4)
+    path = Path(user_file)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open('w', encoding='utf-8') as f:
+            json.dump(users, f, indent=4)
+    except Exception:
+        pass
         
     
 """Image Embedding generation"""
