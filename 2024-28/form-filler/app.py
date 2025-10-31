@@ -130,18 +130,18 @@ async def upload_and_process_pdfs(
             if not pdf_file.filename.lower().endswith(".pdf"):
                 continue
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(await pdf_file.read())
-                temp_path = temp_file.name
+            temp_path = None
+            try:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                    temp_file.write(await pdf_file.read())
+                    temp_path = temp_file.name
 
-            loader = PyPDFLoader(temp_path)
-            pages = loader.load()
+                loader = PyPDFLoader(temp_path)
+                pages = loader.load()
 
-            chunks = text_splitter.split_documents(pages)
-            all_documents.extend(chunks)
-
-            all_documents.extend(chunks)
-            logger.info(f"✅ Created {len(chunks)} chunks from {pdf_file.filename}")
+                chunks = text_splitter.split_documents(pages)
+                all_documents.extend(chunks)
+                logger.info(f"✅ Created {len(chunks)} chunks from {pdf_file.filename}")
 
             except Exception as e:
                 error_type = str(type(e).__name__)
@@ -166,7 +166,8 @@ async def upload_and_process_pdfs(
             
             finally:
                 try:
-                    os.unlink(temp_file_path)
+                    if temp_path and os.path.exists(temp_path):
+                        os.unlink(temp_path)
                 except:
                     pass
 
