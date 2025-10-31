@@ -84,13 +84,33 @@ async def upload_and_process_pdfs(
 ):
     """Upload and process PDF files into Pinecone vector database"""
     try:
-        logger.info(f"🔄 Processing {len(pdfs)} PDF files")
-
-        # Validate inputs
-        if not pdfs:
+        # pdf count validation
+        if len(pdfs) == 0:
             raise HTTPException(status_code=400, detail="No PDF files provided")
+        elif len(pdfs) > 10:
+            logger.warning(f"⚠️ Large batch: Processing {len(pdfs)} PDF files")
+        else:
+            logger.info(f"🔄 Processing {len(pdfs)} PDF files")
+
+        # Enhanced pdf validation with file type check
+        total_size = 0
+        for pdf in pdfs:
+            if not pdf.filename:
+                raise HTTPException(status_code=400, detail="Invalid PDF filename")
+            if not pdf.filename.lower().endswith('.pdf'):
+                raise HTTPException(status_code=400, detail=f"Invalid file type: {pdf.filename} (must be PDF)")
+            if pdf.size == 0:
+                raise HTTPException(status_code=400, detail=f"Empty file: {pdf.filename}")
+            total_size += pdf.size
+
+        # Size validation with more informative message 
+        # 50MB total limit
+        if total_size > 50_000_000:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Total PDF size ({total_size/1_000_000:.1f}MB) exceeds 50MB limit"
+            )
         
-        # Resolve keys from form fields, headers, or env vars
         headers = http_request.headers if http_request else {}
         resolved_gemini = _resolve_key(gemini_key, headers, "x-gemini-key", "GOOGLE_API_KEY")
         resolved_pinecone_key = _resolve_key(pinecone_key, headers, "x-pinecone-key", "PINECONE_API_KEY")
