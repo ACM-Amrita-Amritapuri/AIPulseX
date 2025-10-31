@@ -74,9 +74,10 @@ class LogStorage:
     
     def get_logs(self, limit=None):
         with self.lock:
-            if limit:
-                return list(self.logs)[-limit:]
-            return list(self.logs)
+            logs_snapshot=list(self.logs)
+        if limit:
+            return logs_snapshot[-limit:]
+        return logs_snapshot
     
     def clear_logs(self):
         with self.lock:
@@ -85,7 +86,7 @@ class LogStorage:
 # Global log storage
 app_logs = LogStorage()
 
-# Custom logging handler to capture application logs
+# Custom logging handler 
 class MemoryLogHandler(logging.Handler):
     def emit(self, record):
         try:

@@ -4,18 +4,17 @@ import pandas as pd
 import numpy as np
 import joblib
 from datetime import datetime
-from flask import Flask, request, render_template, jsonify
 
 # ==========================
 # Load trained models
 # ==========================
-reg_model = joblib.load("reg_pipeline.pkl")   # regression pipeline
-clf_model = joblib.load("clf_pipeline.pkl")   # classification pipeline
+reg_model = joblib.load("reg_pipeline.pkl")   # Regression pipeline
+clf_model = joblib.load("clf_pipeline.pkl")   # Classification pipeline
 
 API_KEY = "d985a85e680ff6ef6df85acd61fe9ab3"
 
 # ==========================
-# Helper: Get weather data
+# Helper: Fetch weather data
 # ==========================
 def get_weather_data(city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
@@ -25,7 +24,7 @@ def get_weather_data(city):
     return None
 
 # ==========================
-# Helper: Preprocess for model
+# Helper: Preprocess for Model
 # ==========================
 def preprocess_weather_for_model(api_data):
     main = api_data["main"]
@@ -64,14 +63,14 @@ def preprocess_weather_for_model(api_data):
     return features
 
 # ==========================
-# Helper: Prediction
+# Prediction Handler
 # ==========================
 def predict_rainfall(api_data):
     features = preprocess_weather_for_model(api_data)
 
     # Regression
     rain_mm_log = reg_model.predict(features)[0]
-    rain_mm = np.expm1(rain_mm_log)  # reverse log1p
+    rain_mm = np.expm1(rain_mm_log)
 
     # Classification
     rain_class = clf_model.predict(features)[0]
@@ -92,60 +91,62 @@ def predict_rainfall(api_data):
 # ==========================
 st.set_page_config(page_title="Weather Guide", page_icon="🌦", layout="centered")
 
-st.markdown("<h1 style='text-align: center; font-size: 45px;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size:18px;'>Get live weather info worldwide & predict rainfall in Telangana</p>", unsafe_allow_html=True)
-
+st.markdown("<h1 style='text-align: center; color:#0072B2;'>🌍 Weather Guide</h1>", unsafe_allow_html=True)
+st.divider()
 page = st.sidebar.radio("📌 Navigate", ["🌍 Weather Info", "🌧 Rainfall Prediction"])
 
-# ==========================
-# Page 1: Global Weather Info
-# ==========================
+# --------------------------
+# Page 1: Weather Info
+# --------------------------
 if page == "🌍 Weather Info":
-    st.header("🌍 Global Weather Information")
-    city = st.text_input("Enter City Name (e.g., London, New York, Hyderabad):")
-
-    if st.button("Get Weather 🌡️"):
-        data = get_weather_data(city)
+    city = st.text_input("🏙️ Enter a City Name:")
+    if st.button("Check Weather 🌦️"):
+        with st.spinner("Fetching live weather data..."):
+            data = get_weather_data(city)
         if data:
             st.success(f"✅ Weather in {city.title()}")
             st.write("**🌤 Condition:**", data["weather"][0]["description"].title())
-            st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
-            st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
-            st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
+            st.write("**🌡 Temperature:**", f"{data['main']['temp']} °C")
+            st.write("**💧 Humidity:**", f"{data['main']['humidity']} %")
+            st.write("**🌀 Wind Speed:**", f"{data['wind']['speed']} m/s")
         else:
-            st.error("⚠️ City not found or API error.")
+            st.error("⚠️ Invalid city name or API limit exceeded.")
 
-# ==========================
-# Page 2: Telangana Rainfall Prediction
-# ==========================
+# --------------------------
+# Page 2: Telangana Rainfall
+# --------------------------
 elif page == "🌧 Rainfall Prediction":
-    st.header("🌧 Telangana Rainfall Prediction")
-    district = st.text_input("Enter Telangana District:")
-
-    if st.button("Predict Rainfall 🌦"):
-        city = district + ",IN"   # to query OpenWeather
-        data = get_weather_data(city)
-
+    district = st.text_input("🏘️ Enter Telangana District:")
+    if st.button("Predict Rainfall 🌧"):
+        city = district + ",IN"
+        with st.spinner("Analyzing weather data..."):
+            data = get_weather_data(city)
         if data:
             st.subheader(f"📍 Live Weather in {district.title()}")
-            st.write("**🌡 Temperature:**", data["main"]["temp"], "°C")
-            st.write("**💧 Humidity:**", data["main"]["humidity"], "%")
-            st.write("**🌀 Wind Speed:**", data["wind"]["speed"], "m/s")
+            st.write("**🌡 Temperature:**", f"{data['main']['temp']} °C")
+            st.write("**💧 Humidity:**", f"{data['main']['humidity']} %")
+            st.write("**🌀 Wind Speed:**", f"{data['wind']['speed']} m/s")
 
             rain_mm, rain_text = predict_rainfall(data)
 
-            st.subheader("🌦 Prediction Result")
             st.metric("Predicted Rainfall (mm)", f"{rain_mm:.2f}")
-            st.markdown(f"<h3 style='color:blue;'>{rain_text}</h3>", unsafe_allow_html=True)
-        else:
-            st.error("⚠️ District not found or API error.")
 
-# ==========================
-# Flask API
-# ==========================
-app = Flask(__name__)
-@app.route('/predict', methods=['POST'])
-def predict():
-    values = [float(x) for x in request.form.values()]
-    pred = model.predict([np.array(values)])
-    return jsonify(prediction=pred[0])  # WRONG: pred[0] is NumPy scalar
+            st.markdown(
+                f"""
+                <div style='padding:12px; background-color:#E3F2FD; border-radius:10px;'>
+                <h3 style='color:#0056b3;'>{rain_text}</h3>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.error("⚠️ District not found or API error occurred.")
+
+# --------------------------
+# Footer
+# --------------------------
+st.divider()
+st.markdown(
+    f"<p style='text-align:center; font-size:13px; color:gray;'>⏰ Last updated at {datetime.now().strftime('%I:%M %p, %d %b %Y')}</p>",
+    unsafe_allow_html=True
+)
