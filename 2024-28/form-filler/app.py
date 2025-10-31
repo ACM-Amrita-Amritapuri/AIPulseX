@@ -103,7 +103,8 @@ async def upload_and_process_pdfs(
             raise HTTPException(
                 status_code=400, 
                 detail=f"Total PDF size ({total_size/1_000_000:.1f}MB) exceeds 50MB limit"
-            )
+)
+
 # Normalize headers to a plain dict with lowercase keys for consistent lookups
 headers = {}
 if http_request and getattr(http_request, "headers", None):
@@ -122,8 +123,8 @@ if http_request and getattr(http_request, "headers", None):
         headers = {}
 else:
     headers = {}
-+            headers = {}
-        resolved_gemini = _resolve_key(gemini_key, headers, "x-gemini-key", "GOOGLE_API_KEY")
+
+resolved_gemini = _resolve_key(gemini_key, headers, "x-gemini-key", "GOOGLE_API_KEY")
         resolved_pinecone_key = _resolve_key(pinecone_key, headers, "x-pinecone-key", "PINECONE_API_KEY")
         resolved_pinecone_env = _resolve_key(pinecone_env, headers, "x-pinecone-env", "PINECONE_ENV")
         resolved_pinecone_host = _resolve_key(pinecone_host, headers, "x-pinecone-host", "PINECONE_HOST")
