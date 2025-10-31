@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 from typing import List, Optional
+from datetime import datetime
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -103,8 +104,25 @@ async def upload_and_process_pdfs(
                 status_code=400, 
                 detail=f"Total PDF size ({total_size/1_000_000:.1f}MB) exceeds 50MB limit"
             )
-        
-        headers = http_request.headers if http_request else {}
+# Normalize headers to a plain dict with lowercase keys for consistent lookups
+headers = {}
+if http_request and getattr(http_request, "headers", None):
+    try:
+        raw_headers = http_request.headers
+        try:
+            headers = {k.lower(): v for k, v in raw_headers.items()}
+        except Exception:
+            # Fallbacks in case headers isn't iterable as expected
+            try:
+                headers = dict(raw_headers)
+                headers = {k.lower(): v for k, v in headers.items()}
+            except Exception:
+                headers = {}
+    except Exception:
+        headers = {}
+else:
+    headers = {}
++            headers = {}
         resolved_gemini = _resolve_key(gemini_key, headers, "x-gemini-key", "GOOGLE_API_KEY")
         resolved_pinecone_key = _resolve_key(pinecone_key, headers, "x-pinecone-key", "PINECONE_API_KEY")
         resolved_pinecone_env = _resolve_key(pinecone_env, headers, "x-pinecone-env", "PINECONE_ENV")
@@ -130,18 +148,18 @@ async def upload_and_process_pdfs(
             if not pdf_file.filename.lower().endswith(".pdf"):
                 continue
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(await pdf_file.read())
-                temp_path = temp_file.name
+            temp_path = None
+            try:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                    temp_file.write(await pdf_file.read())
+                    temp_path = temp_file.name
 
-            loader = PyPDFLoader(temp_path)
-            pages = loader.load()
+                loader = PyPDFLoader(temp_path)
+                pages = loader.load()
 
-            chunks = text_splitter.split_documents(pages)
-            all_documents.extend(chunks)
-
-            all_documents.extend(chunks)
-            logger.info(f"✅ Created {len(chunks)} chunks from {pdf_file.filename}")
+                chunks = text_splitter.split_documents(pages)
+                all_documents.extend(chunks)
+                logger.info(f"✅ Created {len(chunks)} chunks from {pdf_file.filename}")
 
             except Exception as e:
                 error_type = str(type(e).__name__)
@@ -166,7 +184,8 @@ async def upload_and_process_pdfs(
             
             finally:
                 try:
-                    os.unlink(temp_file_path)
+                    if temp_path and os.path.exists(temp_path):
+                        os.unlink(temp_path)
                 except:
                     pass
 
