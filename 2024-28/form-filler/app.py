@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import logging
 
+missing_packages = []
+
 try:
     from langchain_community.document_loaders import PyPDFLoader
     from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -16,9 +18,13 @@ try:
     from langchain_pinecone import PineconeVectorStore
     from groq import Groq
 except ImportError as e:
-    print(f"Missing required package: {e}")
-    print("Please install: pip install -r requirements.txt")
-    exit(1)
+    # Collect missing package errors and continue in degraded mode so the app can start
+    missing_packages.append(str(e))
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    logger.error("Missing required package: %s", e)
+    logger.error("Proceeding in degraded mode. To enable full functionality install: pip install -r requirements.txt")
+    # Do not exit here so REST API can still respond with helpful error messages later
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
