@@ -220,8 +220,26 @@ async def upload_and_process_pdfs(
                 logger.info(f"✅ Created {len(chunks)} chunks from {pdf_file.filename}")
 
             except Exception as e:
-                logger.error(f"❌ Error processing PDF {pdf_file.filename}: {e}")
+                error_type = str(type(e).__name__)
+                error_msg = str(e).lower()
+                
+                # Specific error handling for common PDF issues
+                if "encrypted" in error_msg:
+                    logger.error(f"❌ Cannot process encrypted PDF: {pdf_file.filename}")
+                elif "password" in error_msg:
+                    logger.error(f"❌ Password-protected PDF not supported: {pdf_file.filename}")
+                elif "corrupted" in error_msg or "invalid" in error_msg:
+                    logger.error(f"❌ Corrupted or invalid PDF: {pdf_file.filename}")
+                elif "memory" in error_msg:
+                    logger.error(f"❌ PDF too large to process: {pdf_file.filename}")
+                else:
+                    logger.error(f"❌ Error ({error_type}) processing PDF {pdf_file.filename}: {str(e)}")
+                
+                # Log stack trace for unexpected errors
+                if error_type not in ["PDFSyntaxError", "PDFPasswordError", "PDFPageCountError"]:
+                    logger.exception("Unexpected PDF processing error")
                 continue
+            
             finally:
                 try:
                     os.unlink(temp_file_path)
