@@ -5,7 +5,7 @@ import joblib
 # Load model (ensure preprocessing is included inside the model pipeline)
 model = joblib.load("best_model.pkl")
 
-st.title("💊 Patient Medication Adherence Prediction App")
+st.title(" Patient Medication Adherence Prediction App")
 st.write("This app predicts whether a patient will adhere to their medication regimen based on given details.")
 
 col1, col2 = st.columns(2)
@@ -19,7 +19,7 @@ with col1:
     education = st.selectbox("Education Level", ["High School", "Graduate", "Postgraduate"])
 
 with col2:
-    income = st.number_input("Income", 100000, 1500000, 500000)
+    income = st.number_input("Income", 100000, 1500000, 50000)
     social_support = st.selectbox("Social Support", ["Low", "Medium", "High"])
     condition_severity = st.selectbox("Condition Severity", ["Mild", "Moderate", "Severe"])
     comorbidities = st.slider("Comorbidities Count", 0, 10, 2)
@@ -27,7 +27,7 @@ with col2:
     mental_health = st.selectbox("Mental Health", ["Poor", "Moderate", "Good"])
     insurance = st.selectbox("Insurance Coverage", ["No", "Yes"])
 
-# Encode categorical variables (if preprocessing not in model)
+# Encode categorical variables 
 input_data = {
     'Age': age,
     'Gender': gender,
@@ -52,9 +52,9 @@ if st.button("Predict"):
         probability = model.predict_proba(input_df)[0]
 
         if prediction == 1:
-            st.success(f"✅ Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
+            st.success(f" Patient is likely to ADHERE ({probability[1]*100:.1f}% probability)")
         else:
-            st.error(f"❌ Patient is likely to NOT ADHERE ({probability[0]*100:.1f}% probability)")
+            st.error(f"Patient is likely to NOT ADHERE ({probability[0]*100:.1f}% probability)")
 
         st.write("### Confidence Scores")
         st.write(f"- Adherence: {probability[1]*100:.1f}%")
