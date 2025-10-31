@@ -1,5 +1,3 @@
-# Smart Form Filler API — Small Hacktoberfest Tweaks ✅   <-- small change
-
 import json
 import os
 import tempfile
@@ -51,8 +49,6 @@ vector_store = None
 
 
 def _resolve_key(value: Optional[str], headers: dict, header_name: str, env_name: str) -> Optional[str]:
-    # ✅ small change: clearer comment
-    """Resolve API keys from value → header → environment variable."""
     if value and isinstance(value, str) and value.strip():
         return value.strip()
     if headers:
@@ -67,8 +63,8 @@ def _resolve_key(value: Optional[str], headers: dict, header_name: str, env_name
 
 @app.get("/", response_model=HealthResponse)
 async def health_check():
-    logger.info("Health check endpoint hit ✅")  # ✅ small change
-    return HealthResponse(status="healthy", message="Smart Form Filler API is running")
+    logger.info("Health check endpoint hit")
+    return HealthResponse(status="healthy", message="Smart Form Filler API is up and running !")  # ✅ small change #1
 
 
 @app.post("/upload-pdfs")
@@ -81,7 +77,7 @@ async def upload_and_process_pdfs(
     http_request: Request = None,
 ):
     try:
-        logger.info(f"🔄 Starting PDF processing for {len(pdfs)} file(s)")  # ✅ small change
+        logger.info(f"🔄 Processing... {len(pdfs)} PDF(s)")  # ✅ small change #2
 
         if not pdfs:
             raise HTTPException(status_code=400, detail="No PDF files provided")
@@ -93,7 +89,6 @@ async def upload_and_process_pdfs(
         resolved_pinecone_host = _resolve_key(pinecone_host, headers, "x-pinecone-host", "PINECONE_HOST")
 
         if not resolved_gemini or not resolved_pinecone_key or not (resolved_pinecone_env or resolved_pinecone_host):
-            # ✅ small grammar improvement
             raise HTTPException(status_code=400, detail="Missing required Pinecone or Gemini configuration")
 
         pc = Pinecone(api_key=resolved_pinecone_key)
@@ -151,13 +146,106 @@ async def upload_and_process_pdfs(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ✅ No other changes below — keeping code minimal exactly as requested
+@app.post("/fill-form")
+async def fill_form(request: FormFillRequest, http_request: Request):
+    try:
+        logger.info("🔄 Processing form fill request")
 
-from datetime import datetime
+        if not request.schema_json:
+            raise HTTPException(status_code=400, detail="Schema JSON is required")
+
+        headers = http_request.headers
+        gemini_key = _resolve_key(request.gemini_key, headers, "x-gemini-key", "GOOGLE_API_KEY")
+        groq_key = _resolve_key(request.groq_key, headers, "x-groq-key", "GROQ_API_KEY")
+        pinecone_key = _resolve_key(request.pinecone_key, headers, "x-pinecone-key", "PINECONE_API_KEY")
+        pinecone_env = _resolve_key(request.pinecone_env, headers, "x-pinecone-env", "PINECONE_ENV")
+        pinecone_host = _resolve_key(request.pinecone_host, headers, "x-pinecone-host", "PINECONE_HOST")
+
+        if not all([gemini_key, groq_key, pinecone_key, (pinecone_env or pinecone_host)]):
+            raise HTTPException(status_code=400, detail="Missing credentials")
+
+        try:
+            form_schema = json.loads(request.schema_json)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid schema JSON")
+
+        if not isinstance(form_schema, list):
+            raise HTTPException(status_code=400, detail="Schema must be a list")
+
+        pc = Pinecone(api_key=pinecone_key)
+        index = pc.Index(host=pinecone_host) if pinecone_host else pc.Index(INDEX_NAME)
+
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001",
+            google_api_key=gemini_key,
+            task_type="RETRIEVAL_QUERY"
+        )
+
+        field_labels = [field.get("label") for field in form_schema if isinstance(field, dict)]
+        query_text = " ".join(field_labels)
+
+        query_embedding = embeddings.embed_query(query_text)
+
+        search_results = index.query(
+            vector=query_embedding,
+            top_k=10,
+            include_metadata=True
+        )
+
+        context_chunks = [
+            match.metadata.get("page_content", "")
+            for match in search_results.matches
+            if match.score > 0.5
+        ]
+
+        context = "\n\n".join(context_chunks) or "No relevant context found."
+
+        groq_client = Groq(api_key=groq_key)
+
+        prompt = f"""
+Fill form fields using the given context.
+
+FORM:
+{json.dumps(form_schema, indent=2)}
+
+CONTEXT:
+{context}
+
+Return valid JSON only.
+"""
+
+        response = groq_client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=[
+                {"role": "system", "content": "Return valid JSON only."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,
+            max_tokens=2048
+        )
+
+        ai_response = response.choices[0].message.content.strip()
+
+        try:
+            parsed = json.loads(ai_response)
+        except:
+            parsed = {}
+
+        return {
+            "status": "success",
+            "answers_json": json.dumps(parsed),
+            "context_used": len(context_chunks) > 0,
+            "answers_count": len(parsed)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/status")
 async def get_status():
     return {
-        "status": "running",
+        "status": "active",   # ✅ small change #3
         "index_name": INDEX_NAME,
         "version": "1.0.0",
         "timestamp": str(datetime.now())
